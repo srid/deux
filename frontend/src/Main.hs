@@ -1,5 +1,8 @@
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE NoMonomorphismRestriction #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeFamilies #-}
 
 module Main where
 
@@ -13,16 +16,27 @@ import qualified Language.Javascript.JSaddle.Warp as JW
 import Reflex.Dom hiding (mainWidget)
 import Reflex.Dom.Main (mainWidget)
 
+-- Create a runner that watches for ghcid success, and reloads the app!
 main :: IO ()
-main = JW.run 3000 $ mainWidget app
+main = do
+  putStrLn "Running app at http://localhost:3000/"
+  JW.run 3000 $ mainWidget app
 
 app :: MonadWidget t m => m ()
 app = do
-  ev <- reflexDia def (circle 100 # lc blue # lwL 2)
-  ct <- count . ffilter getAny $ diaMousedownEv ev
-  dynText $ fmap counter ct
+  let sz = dims2D 500.0 500.0
+      opts = ReflexOptions sz mempty
+  ev <- reflexDia opts diagram
   return ()
 
-counter :: Int -> Text
-counter i = T.concat ["The circle has been clicked ", T.pack (show i), " times" ]
+hilbert 0 = mempty
+hilbert n = hilbert' (n-1) # reflectY <> vrule 1
+         <> hilbert  (n-1) <> hrule 1
+         <> hilbert  (n-1) <> vrule (-1)
+         <> hilbert' (n-1) # reflectX
+  where
+    hilbert' m = hilbert m # rotateBy (1/4)
 
+diagram :: Diagram B
+diagram = strokeT (hilbert 6) # lc blue
+                              # opacity 0.3
