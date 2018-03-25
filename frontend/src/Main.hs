@@ -11,13 +11,8 @@
 module Main where
 
 import Data.Proxy (Proxy (..))
-import Data.Text (Text)
 import qualified Data.Text as T
 
-import Diagrams.Backend.Reflex
-import Diagrams.Prelude hiding (connect, el, text)
-
-import Servant.API
 import Servant.Reflex
 
 import qualified Language.Javascript.JSaddle.Warp as JW
@@ -33,15 +28,26 @@ main = do
 
 app :: MonadWidget t m => m ()
 app = do
-  divClass "" $ do
-    el "tt" $ text $ "todo"
+  someWidget
   return ()
+
+serverUrl :: BaseUrl
+serverUrl = BaseFullUrl Http "localhost" 3001 "/"
 
 someWidget :: forall t m. MonadWidget t m => m ()
 someWidget = do
-  let (demo :<|> _) = client (Proxy :: Proxy DemoAPI)
+  let (demo) = client (Proxy :: Proxy DemoAPI)
             (Proxy :: Proxy m)
             (Proxy :: Proxy ())
-            (constDyn (BasePath "/demo"))
-  demo never
+            (constDyn serverUrl)
+  pb <- getPostBuild
+  result <- demo $ () <$ pb
+  let ys = fmapMaybe reqSuccess result
+      errs = fmapMaybe reqFailure result
+
+  el "tt" $ do
+    dynText =<< holdDyn "" (T.pack . show <$> ys)
   return ()
+
+  elAttr "p" ("style" =: "color:red") $
+    dynText =<< holdDyn "" (leftmost [errs, const "" <$> ys])

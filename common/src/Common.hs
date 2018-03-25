@@ -26,4 +26,3 @@ instance ToJSON Task
 instance FromJSON Task
 
 type DemoAPI = "demo" :> Get '[JSON] Task
-               :<|> Raw
