@@ -3,6 +3,7 @@
 module Common where
 
 import GHC.Generics
+import Data.Aeson
 
 import Dhall
 
@@ -13,3 +14,5 @@ data Task = Task
   deriving (Generic, Show)
 
 instance Interpret Task
+instance ToJSON Task
+instance FromJSON Task
