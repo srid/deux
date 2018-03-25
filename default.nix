@@ -38,9 +38,33 @@
       rev = "b47f90c810c838009bf69e1f8dacdcd10fe8ffe3";
       sha256 = "0yvjnr9xfm0bg7b6q7ssdci43ca2ap3wvjhshv61dnpvh60ldsk9";
     };
+
+    servant-reflex = pkgs.fetchFromGitHub {
+      owner = "imalsogreg";
+      repo = "servant-reflex";
+      rev = "2996dbc8e0922e29939d05ac647b897650ab64a8";
+      sha256 = "03880y11yfmmxk1s35wdqzghm4pcq44qm4hcw0577mmi4gdva8vi";
+    };
+
+    servant-auth = pkgs.fetchFromGitHub {
+      owner = "haskell-servant";
+      repo = "servant-auth";
+      rev = "293998f6212835f5d755b0182868d7531141110a";
+      sha256 = "1hsxnlm909fs7cawgdnrn6nygf9shzr9n05xi5b52bq7jgpvhwbq";
+    };
+
+    glob = pkgs.fetchFromGitHub {
+      owner = "Deewiant";
+      repo = "glob";
+      rev = "d55ac01a8a98efc6ab881acc56b4d0fc6595019d";
+      sha256 = "02i64r7zrab2b4kyf5z3fq8hvljf7s6gzd8whdvdsjik7vwyzcd1";
+    };
   in
   {
     diagrams-reflex = self.callPackage "${diagrams-reflex}" {};
     reflex-dom-contrib = self.callCabal2nix "reflex-dom-contrib" "${reflex-dom-contrib}" {};
+    servant-reflex = self.callCabal2nix "servant-reflex" "${servant-reflex}" {};
+    servant-auth = self.callCabal2nix "servant-auth" "${servant-auth}/servant-auth" {};
+    Glob = self.callCabal2nix "Glob" "${glob}" {};
   };
 })

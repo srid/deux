@@ -23,7 +23,6 @@ import Network.Wai.Handler.Warp
 
 import Common
 
-type DemoAPI = "demo" :> Get '[JSON] Task
 
 server :: Server DemoAPI
 server = do
