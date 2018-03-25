@@ -23,7 +23,6 @@ import Common
 
 main :: IO ()
 main = do
-  putStrLn "Running app at http://localhost:3000/"
   JW.run 3000 $ mainWidget app
 
 app :: MonadWidget t m => m ()

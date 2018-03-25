@@ -25,4 +25,4 @@ instance Interpret Task
 instance ToJSON Task
 instance FromJSON Task
 
-type DemoAPI = "demo" :> Get '[JSON] Task
+type DemoAPI = "demo" :> Get '[JSON] [Task]

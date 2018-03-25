@@ -21,10 +21,9 @@ import Network.Wai.Middleware.RequestLogger (logStdoutDev)
 
 import Common
 
-
 server :: Server DemoAPI
 server = do
-  x :: Task <- liftIO $ input auto "../demo.dhall"
+  x :: [Task] <- liftIO $ input auto "./demo.dhall"
   return x
 
 demoAPI :: Proxy DemoAPI
@@ -35,5 +34,4 @@ app = serve demoAPI server
 
 main :: IO ()
 main = do
-  putStrLn "Running backend at http://localhost:3001"
   run 3001 $ simpleCors $ logStdoutDev $ app
