@@ -7,7 +7,7 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeOperators #-}
-module Common (Task, DemoAPI) where
+module Common where
 
 import GHC.Generics
 import Data.Aeson
@@ -16,8 +16,9 @@ import Dhall
 import Servant.API
 
 data Task = Task
-  { text :: Text
+  { title :: Text
   , done :: Bool
+  , description :: Text
   }
   deriving (Generic, Show)
 
