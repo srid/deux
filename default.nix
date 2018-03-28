@@ -39,6 +39,13 @@
       sha256 = "0yvjnr9xfm0bg7b6q7ssdci43ca2ap3wvjhshv61dnpvh60ldsk9";
     };
 
+    semantic-reflex = pkgs.fetchFromGitHub {
+      owner = "tomsmalley";
+      repo = "semantic-reflex";
+      rev = "9211a8ee9b9e97d36f78225da31ed1f885f467aa";
+      sha256 = "102asj8jadz2cajghd8j88dmd7c2frwial18j9iflirbs8vs5x64";
+    };
+
     servant-reflex = pkgs.fetchFromGitHub {
       owner = "imalsogreg";
       repo = "servant-reflex";
@@ -63,6 +70,7 @@
   {
     diagrams-reflex = self.callPackage "${diagrams-reflex}" {};
     reflex-dom-contrib = self.callCabal2nix "reflex-dom-contrib" "${reflex-dom-contrib}" {};
+    semantic-reflex = self.callCabal2nix "semantic-reflex" "${semantic-reflex}/semantic-reflex" {};
     servant-reflex = self.callCabal2nix "servant-reflex" "${servant-reflex}" {};
     servant-auth = self.callCabal2nix "servant-auth" "${servant-auth}/servant-auth" {};
     Glob = self.callCabal2nix "Glob" "${glob}" {};

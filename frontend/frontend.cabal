@@ -27,6 +27,7 @@ executable frontend
                      , diagrams-reflex
                      , jsaddle-warp
                      , reflex-dom
+                     , semantic-reflex
                      , servant-reflex
                      , servant
                      , text
