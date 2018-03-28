@@ -16,9 +16,21 @@ import Dhall
 import Servant.API
 
 data Task = Task
-  { title :: Text
-  , done :: Bool
-  , description :: Text
+  { _taskTitle :: Text
+  , _taskDone :: Bool
+  , _taskDescription :: Text
+  }
+  deriving (Generic, Show)
+
+data Piece = Piece
+  { _pieceTitle :: Text
+  , _pieceBody :: Text
+  }
+  deriving (Generic, Show)
+
+data Demo = Demo
+  { _demoTasks :: [Task]
+  , _demoPieces :: [Piece]
   }
   deriving (Generic, Show)
 
@@ -26,4 +38,12 @@ instance Interpret Task
 instance ToJSON Task
 instance FromJSON Task
 
-type DemoAPI = "demo" :> Get '[JSON] [Task]
+instance Interpret Piece
+instance ToJSON Piece
+instance FromJSON Piece
+
+instance Interpret Demo
+instance ToJSON Demo
+instance FromJSON Demo
+
+type DemoAPI = "demo" :> Get '[JSON] Demo

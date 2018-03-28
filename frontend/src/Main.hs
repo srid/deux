@@ -37,7 +37,7 @@ serverUrl = BaseFullUrl Http "localhost" 3001 "/"
 
 someWidget :: forall t m. MonadWidget t m => m ()
 someWidget = do
-  let (demo) = client (Proxy :: Proxy DemoAPI)
+  let demo = client (Proxy :: Proxy DemoAPI)
             (Proxy :: Proxy m)
             (Proxy :: Proxy ())
             (constDyn serverUrl)
@@ -46,9 +46,16 @@ someWidget = do
   let ys = fmapMaybe reqSuccess result
       errs = fmapMaybe reqFailure result
 
-  tasks <- holdDyn [] ys
+  demoData <- holdDyn (Demo [] []) ys
+
+  el "h2" $ text "Pieces"
+  void $ dyn $ ffor (_demoPieces <$> demoData) $ \pieces -> forM_ pieces $ \piece -> do
+    el "h3" $ text $ T.toStrict $ _pieceTitle piece
+    el "tt" $ text $ tshow $ _pieceBody piece
+
+  el "h2" $ text "Tasks"
   el "tt" $ do
-    taskList tasks
+    taskList $ _demoTasks <$> demoData
   return ()
 
   elAttr "p" ("style" =: "color:red") $
@@ -60,9 +67,9 @@ taskList tasks =
     forM_ tasks' task
 
 task :: MonadWidget t m => Task -> m ()
-task (Task s done_ desc_) = do
-  el "h3" $ text $ T.toStrict s
-  el "code" $ text $ tshow desc_
+task (Task s _done desc_) = do
+  el "h4" $ text $ T.toStrict s
+  el "tt" $ text $ tshow desc_
 
 tshow :: Show a => a -> Data.Text.Text
 tshow = Data.Text.pack . show

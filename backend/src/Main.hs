@@ -9,7 +9,10 @@
 {-# LANGUAGE TypeOperators #-}
 module Main where
 
+import Data.Monoid ((<>))
 import Control.Monad.IO.Class (liftIO)
+import Data.Text.Lazy as TL
+import Data.Char (isUpper)
 
 import Dhall
 
@@ -21,10 +24,20 @@ import Network.Wai.Middleware.RequestLogger (logStdoutDev)
 
 import Common
 
+baseDir :: Text
+baseDir = "/home/srid/Dropbox/deuxContent/"
+
+readDhallFile :: Interpret a => Text -> IO a
+readDhallFile path = input interpretOptions $ baseDir <> path
+  where
+    interpretOptions = autoWith
+      (defaultInterpretOptions { fieldModifier = TL.toLower . TL.dropWhile (not . isUpper) })
+
 server :: Server DemoAPI
 server = do
-  x :: [Task] <- liftIO $ input auto "./demo.dhall"
-  return x
+  tasks :: [Task] <- liftIO $ readDhallFile "Inbox.dhall"
+  pieces :: [Piece] <- liftIO $ readDhallFile "Piece.dhall"
+  return $ Demo tasks pieces
 
 demoAPI :: Proxy DemoAPI
 demoAPI = Proxy
