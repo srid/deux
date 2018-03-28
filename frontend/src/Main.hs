@@ -10,7 +10,7 @@
 {-# LANGUAGE TypeFamilies #-}
 module Main where
 
-import Control.Monad (void, forM_)
+import Control.Monad (forM_, void)
 import Data.Proxy (Proxy (..))
 import qualified Data.Text
 import qualified Data.Text.Lazy as T
@@ -55,13 +55,16 @@ someWidget = do
   demoData <- holdDyn (Demo [] []) ys
 
   segment def $ do
-    el "h2" $ text "Pieces"
+    header (def & headerSize |?~ H2) $ text "Pieces"
     void $ dyn $ ffor (_demoPieces <$> demoData) $ \pieces -> forM_ pieces $ \piece -> do
-      el "h3" $ text $ T.toStrict $ _pieceTitle piece
+      header (def & headerSize |?~ H3) $ do
+        text $ T.toStrict $ _pieceTitle piece
       el "tt" $ text $ T.toStrict $ _pieceBody piece
 
-  segment def $ do
-    el "h2" $ text "Tasks"
+  segment (def
+            & segmentInverted |~ True
+            & segmentSize |?~ Small) $ do
+    header (def & headerSize |?~ H2) $ text "Tasks"
     el "tt" $ do
       taskList $ _demoTasks <$> demoData
     return ()
@@ -73,7 +76,10 @@ taskList tasks =
 
 task :: MonadWidget t m => Task -> m ()
 task (Task s _done desc_) = do
-  el "h4" $ text $ T.toStrict s
+  header (def & headerSize |?~ H3
+            & headerInverted |~ True
+            & headerColor |?~ Purple) $ do
+    text $ T.toStrict s
   el "tt" $ text $ T.toStrict desc_
 
 tshow :: Show a => a -> Data.Text.Text
