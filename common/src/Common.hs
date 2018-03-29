@@ -18,6 +18,7 @@ import Servant.API
 data Task = Task
   { _taskTitle :: Text
   , _taskDone :: Bool
+  , _taskContext :: [Text]
   , _taskDescription :: Text
   }
   deriving (Generic, Show)

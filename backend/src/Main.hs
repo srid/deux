@@ -35,8 +35,12 @@ readDhallFile path = input interpretOptions $ baseDir <> path
 
 server :: Server DemoAPI
 server = do
-  tasks :: [Task] <- liftIO $ readDhallFile "Inbox.dhall"
-  pieces :: [Piece] <- liftIO $ readDhallFile "Piece.dhall"
+  liftIO parseDemo
+
+parseDemo :: IO Demo
+parseDemo = do
+  tasks :: [Task] <- readDhallFile "Inbox.dhall"
+  pieces :: [Piece] <- readDhallFile "Piece.dhall"
   return $ Demo tasks pieces
 
 demoAPI :: Proxy DemoAPI
@@ -47,4 +51,5 @@ app = serve demoAPI server
 
 main :: IO ()
 main = do
+  _ <- parseDemo
   run 3001 $ simpleCors $ logStdoutDev $ app

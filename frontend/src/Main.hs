@@ -75,12 +75,11 @@ taskList tasks =
     forM_ tasks' task
 
 task :: MonadWidget t m => Task -> m ()
-task (Task s _done desc_) = do
+task (Task s _done ctx desc_) = do
   header (def & headerSize |?~ H3
             & headerInverted |~ True
             & headerColor |?~ Purple) $ do
     text $ T.toStrict s
+    text $ T.toStrict $ T.pack $ show ctx
   el "tt" $ text $ T.toStrict desc_
 
-tshow :: Show a => a -> Data.Text.Text
-tshow = Data.Text.pack . show
