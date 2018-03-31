@@ -9,9 +9,10 @@
 {-# LANGUAGE TypeOperators #-}
 module Common where
 
-import Data.Aeson
+import Data.Aeson (FromJSON, ToJSON)
 import Data.Char (isUpper)
 import Data.Default
+import Data.Scientific
 import Data.Text.Lazy as TL
 import GHC.Generics
 
@@ -31,6 +32,14 @@ data Piece = Piece
   , _pieceBody :: Text
   }
   deriving (Generic, Show)
+
+data CostcoTransaction = CostcoTransaction
+  { _costcotransactionTransactionDate :: Text
+  , _costcotransactionDescription :: Text
+  , _costcotransactionCategory :: Text
+  , _costcotransactionDebit :: Maybe Scientific
+  , _costcotransactionCredit :: Maybe Scientific
+  }
 
 data Demo = Demo
   { _demoTasks :: [Task]
