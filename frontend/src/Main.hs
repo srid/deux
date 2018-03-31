@@ -8,6 +8,7 @@
 {-# LANGUAGE RecursiveDo #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE LambdaCase #-}
 module Main where
 
 import Control.Monad (forM_, join)
@@ -18,7 +19,7 @@ import qualified Data.Text.Lazy as T
 import Servant.Reflex
 
 import qualified Language.Javascript.JSaddle.Warp as JW
-import Reflex.Dom hiding (mainWidgetWithCss, _dropdown_value)
+import Reflex.Dom hiding (button, mainWidgetWithCss, _dropdown_value)
 
 import Reflex.Dom.SemanticUI
 
@@ -87,10 +88,18 @@ taskFilter ctxs = do
   return $ T.fromStrict <$> d
 
 task :: MonadWidget t m => Task -> m ()
-task (Task s _done ctx _desc) = do
+task (Task s _done ctx desc) = do
   label (def & labelLink .~ True & labelColor |?~ Teal
               & labelRibbon |?~ LeftRibbon) $ text $ T.toStrict $ T.pack $ show ctx
+  viewNote <- True <<$ do
+    if desc /= ""
+      then button (def & buttonFloated |?~ RightFloated) $ text "View Notes"
+      else return never
+
   text $ T.toStrict s
+  widgetHold_ blank $ ffor viewNote $ \_ -> do
+    segment def $ do
+      el "tt" $ text $ T.toStrict desc
   divider def
     -- forM_ ctx $ \c -> label def $ text $ T.toStrict $ c
   -- el "tt" $ text $ T.toStrict desc_
@@ -106,3 +115,5 @@ pieceList pieces = segment def $ do
 (<<$>>) :: (Functor f2, Functor f1) => (a -> b) -> f1 (f2 a) -> f1 (f2 b)
 (<<$>>) = fmap . fmap
 
+(<<$) :: (Functor f2, Functor f1) => a -> f1 (f2 b) -> f1 (f2 a)
+v <<$ f = fmap (v <$) f
