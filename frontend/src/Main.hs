@@ -11,7 +11,8 @@
 {-# LANGUAGE LambdaCase #-}
 module Main where
 
-import Control.Monad (forM_, join)
+import Control.Monad (forM_, join, (<=<))
+import Data.Bool (bool)
 import Data.Proxy (Proxy (..))
 import Data.Set (fromList, toList)
 import qualified Data.Text.Lazy as T
@@ -30,7 +31,9 @@ main = do
   -- TODO: Multiplex when doing ghcjs builds
   JW.run 3000 $ mainWidgetWithCss cssInline app
   where
-    cssInline = "@import url(https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.0/semantic.min.css);";
+    cssInline =
+      "@import url(https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.0/semantic.min.css);\
+      \.asis { font-family: monospace; white-space: pre-wrap; }";
 
 app :: MonadWidget t m => m ()
 app = container def $  do
@@ -91,18 +94,19 @@ task :: MonadWidget t m => Task -> m ()
 task (Task s _done ctx desc) = do
   label (def & labelLink .~ True & labelColor |?~ Teal
               & labelRibbon |?~ LeftRibbon) $ text $ T.toStrict $ T.pack $ show ctx
-  viewNote <- True <<$ do
-    if desc /= ""
-      then button (def & buttonFloated |?~ RightFloated) $ text "View Notes"
-      else return never
+
+  rec let conf = def
+            & buttonFloated |?~ RightFloated
+            & buttonEmphasis .~ Dyn (bool Nothing (Just Primary) <$> viewNote)
+      viewNote <- if desc /= ""
+                     then toggle False <=< button conf $ text "Toggle Notes"
+                     else return $ constDyn False
 
   text $ T.toStrict s
-  widgetHold_ blank $ ffor viewNote $ \_ -> do
-    segment def $ do
-      el "tt" $ text $ T.toStrict desc
+  dyn_ $ ffor viewNote $ \case
+    True -> note desc
+    False -> blank
   divider def
-    -- forM_ ctx $ \c -> label def $ text $ T.toStrict $ c
-  -- el "tt" $ text $ T.toStrict desc_
 
 pieceList :: MonadWidget t m => [Piece] -> m ()
 pieceList pieces = segment def $ do
@@ -110,7 +114,10 @@ pieceList pieces = segment def $ do
   forM_ pieces $ \piece -> do
     header (def & headerSize |?~ H3) $ do
       text $ T.toStrict $ _pieceTitle piece
-    el "tt" $ text $ T.toStrict $ _pieceBody piece
+    note $ _pieceBody piece
+
+note :: UI t m => T.Text -> m ()
+note = segment def . divClass "asis" . text . T.toStrict
 
 (<<$>>) :: (Functor f2, Functor f1) => (a -> b) -> f1 (f2 a) -> f1 (f2 b)
 (<<$>>) = fmap . fmap
