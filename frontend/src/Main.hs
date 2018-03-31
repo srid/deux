@@ -10,9 +10,9 @@
 {-# LANGUAGE TypeFamilies #-}
 module Main where
 
-import Control.Monad (forM_, void)
+import Control.Monad (forM_, join)
 import Data.Proxy (Proxy (..))
-import qualified Data.Text as TS
+import Data.Set (fromList, toList)
 import qualified Data.Text.Lazy as T
 
 import Servant.Reflex
@@ -59,22 +59,32 @@ someWidget = do
   elAttr "p" ("style" =: "color:red") $
     dynText =<< holdDyn "" (leftmost [errs, const "" <$> ys])
 
-  demoData <- holdDyn def ys
-  taskList $ _demoTasks <$> demoData
-  pieceList $ _demoPieces <$> demoData
+  widgetHold_ blank $ taskList <$> _demoTasks <$> ys
+  widgetHold_ blank $ pieceList <$> _demoPieces <$> ys
 
-taskList :: MonadWidget t m => Dynamic t [Task] -> m ()
+taskList :: MonadWidget t m => [Task] -> m ()
 taskList tasks = segment def $ do
   header (def & headerSize |?~ H2) $ text "Current tasks"
-  taskFilter []
-  void $ dyn $ ffor tasks $ \tasks' -> do
+  ctxQuery <- taskFilter $ allContexts tasks
+  dyn_ $ ffor ctxQuery $ \q ->
     segment (def & segmentRaised |~ True) $ do
-      forM_ tasks' task
+      forM_ tasks $ \t -> do
+        if matchCtx q t
+          then task t
+          else blank
 
-taskFilter :: MonadWidget t m => [T.Text] -> m ()
+matchCtx :: T.Text -> Task -> Bool
+matchCtx c t = case c of
+  "" -> True
+  _ -> any (T.isInfixOf c) $ _taskContext t
+
+allContexts :: [Task] -> [T.Text]
+allContexts = toList . fromList . join . fmap _taskContext
+
+taskFilter :: MonadWidget t m => [T.Text] -> m (Dynamic t T.Text)
 taskFilter ctxs = do
   d <- _dropdown_value <<$>> searchDropdown def "" $ TaggedStatic $ T.toStrict <$> ctxs
-  return ()
+  return $ T.fromStrict <$> d
 
 task :: MonadWidget t m => Task -> m ()
 task (Task s _done ctx _desc) = do
@@ -85,10 +95,10 @@ task (Task s _done ctx _desc) = do
     -- forM_ ctx $ \c -> label def $ text $ T.toStrict $ c
   -- el "tt" $ text $ T.toStrict desc_
 
-pieceList :: MonadWidget t m => Dynamic t [Piece] -> m ()
+pieceList :: MonadWidget t m => [Piece] -> m ()
 pieceList pieces = segment def $ do
   header (def & headerSize |?~ H2) $ text "Pieces"
-  void $ dyn $ ffor pieces $ \pieces' -> forM_ pieces' $ \piece -> do
+  forM_ pieces $ \piece -> do
     header (def & headerSize |?~ H3) $ do
       text $ T.toStrict $ _pieceTitle piece
     el "tt" $ text $ T.toStrict $ _pieceBody piece
