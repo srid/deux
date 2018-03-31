@@ -66,6 +66,34 @@
       rev = "d55ac01a8a98efc6ab881acc56b4d0fc6595019d";
       sha256 = "02i64r7zrab2b4kyf5z3fq8hvljf7s6gzd8whdvdsjik7vwyzcd1";
     };
+
+    sv = pkgs.fetchFromGitHub {
+      owner = "qfpl";
+      repo = "sv";
+      rev = "ce417c0ea666717ff95eb45709eea0f1778d9c67";
+      sha256 = "1makl6djfknh79fwvbjixgjx5hvkqsmq7z8x8gqifxlidhjp8kf6";
+    };
+
+    separated = pkgs.fetchFromGitHub {
+      owner = "qfpl";
+      repo = "separated";
+      rev = "0.3.2.1-nix";
+      sha256 = "07f3nh1b4jvqq7lfyxp3ndgzap4dj31lbdjlgrjazrcd2h4zwdln";
+    };
+
+    validation = pkgs.fetchFromGitHub {
+      owner = "qfpl";
+      repo = "validation";
+      rev = "1";
+      sha256 = "0bh3i6dkkxc6sxzbdwk9hkyyqm9cvx7261vl7zrxk0myrj2klfbr";
+    };
+
+    hedgehog = pkgs.fetchFromGitHub {
+      owner  = "hedgehogqa";
+      repo   = "haskell-hedgehog";
+      rev    = "7858d626b198621bc674fbc235c7980fb4002f78";
+      sha256 = "0mmypd6f3imh7bk6br9m9aj97k2yibz2bqcw3a5svp962zsjbkyp";
+    };
   in
   {
     diagrams-reflex = self.callPackage "${diagrams-reflex}" {};
@@ -74,5 +102,13 @@
     servant-reflex = self.callCabal2nix "servant-reflex" "${servant-reflex}" {};
     servant-auth = self.callCabal2nix "servant-auth" "${servant-auth}/servant-auth" {};
     Glob = self.callCabal2nix "Glob" "${glob}" {};
+    # validation = pkgs.haskell.lib.dontCheck pkgs.haskellPackages.validation;
+
+    # sv
+    parsers = pkgs.haskell.lib.dontCheck super.parsers;
+    separated = pkgs.haskell.lib.dontCheck (self.callCabal2nix "separated" "${separated}" {});
+    validation = pkgs.haskell.lib.dontCheck (self.callCabal2nix "validation" "${validation}" {});
+    hedgehog = super.callCabal2nix "hedgehog" "${hedgehog}/hedgehog" {};
+    sv = self.callCabal2nix "sv" "${sv}" {};
   };
 })

@@ -33,14 +33,6 @@ data Piece = Piece
   }
   deriving (Generic, Show)
 
-data CostcoTransaction = CostcoTransaction
-  { _costcotransactionTransactionDate :: Text
-  , _costcotransactionDescription :: Text
-  , _costcotransactionCategory :: Text
-  , _costcotransactionDebit :: Maybe Scientific
-  , _costcotransactionCredit :: Maybe Scientific
-  }
-
 data Demo = Demo
   { _demoTasks :: [Task]
   , _demoPieces :: [Piece]

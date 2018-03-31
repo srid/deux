@@ -22,6 +22,7 @@ import Network.Wai.Middleware.Cors (simpleCors)
 import Network.Wai.Middleware.RequestLogger (logStdoutDev)
 
 import Common
+import Common.Finance
 
 baseDir :: Text
 baseDir = "/home/srid/Dropbox/deuxContent/"
