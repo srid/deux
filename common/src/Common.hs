@@ -9,9 +9,11 @@
 {-# LANGUAGE TypeOperators #-}
 module Common where
 
-import GHC.Generics
 import Data.Aeson
+import Data.Char (isUpper)
 import Data.Default
+import Data.Text.Lazy as TL
+import GHC.Generics
 
 import Dhall
 import Servant.API
@@ -39,15 +41,23 @@ data Demo = Demo
 instance Default Demo where
   def = Demo def def
 
+interpretOptions :: InterpretOptions
+interpretOptions = defaultInterpretOptions { fieldModifier = f }
+  where
+    f = TL.toLower . TL.dropWhile (not . isUpper)
+
 instance Interpret Task
+instance Inject Task
 instance ToJSON Task
 instance FromJSON Task
 
 instance Interpret Piece
+instance Inject Piece
 instance ToJSON Piece
 instance FromJSON Piece
 
 instance Interpret Demo
+instance Inject Demo
 instance ToJSON Demo
 instance FromJSON Demo
 

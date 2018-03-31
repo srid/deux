@@ -9,17 +9,16 @@
 {-# LANGUAGE TypeOperators #-}
 module Main where
 
-import Data.Monoid ((<>))
 import Control.Monad.IO.Class (liftIO)
-import Data.Text.Lazy as TL
-import Data.Char (isUpper)
+import Data.Monoid ((<>))
 
 import Dhall
+import Dhall.Core (pretty)
 
 import Servant
 
-import Network.Wai.Middleware.Cors (simpleCors)
 import Network.Wai.Handler.Warp (run)
+import Network.Wai.Middleware.Cors (simpleCors)
 import Network.Wai.Middleware.RequestLogger (logStdoutDev)
 
 import Common
@@ -28,10 +27,10 @@ baseDir :: Text
 baseDir = "/home/srid/Dropbox/deuxContent/"
 
 readDhallFile :: Interpret a => Text -> IO a
-readDhallFile path = input interpretOptions $ baseDir <> path
-  where
-    interpretOptions = autoWith
-      (defaultInterpretOptions { fieldModifier = TL.toLower . TL.dropWhile (not . isUpper) })
+readDhallFile path = input (autoWith interpretOptions) $ baseDir <> path
+
+dumpDhall :: Inject a => a -> Text
+dumpDhall = pretty . embed (injectWith interpretOptions)
 
 server :: Server DemoAPI
 server = do

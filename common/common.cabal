@@ -22,6 +22,7 @@ library
                      , text
                      , aeson
                      , servant
+                     , data-default
                      , dhall
   hs-source-dirs:      src
   default-language:    Haskell2010
