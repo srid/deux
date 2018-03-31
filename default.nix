@@ -42,8 +42,8 @@
     semantic-reflex = pkgs.fetchFromGitHub {
       owner = "tomsmalley";
       repo = "semantic-reflex";
-      rev = "9211a8ee9b9e97d36f78225da31ed1f885f467aa";
-      sha256 = "102asj8jadz2cajghd8j88dmd7c2frwial18j9iflirbs8vs5x64";
+      rev = "7946d5f43ffce2c4cb090e315bb391af86e66276";
+      sha256 = "0c18ylawg9xnj12hahzp3nwf7vs05rjpvdmwk1nna5z8yy661xkz";
     };
 
     servant-reflex = pkgs.fetchFromGitHub {

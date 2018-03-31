@@ -11,6 +11,7 @@ module Common where
 
 import GHC.Generics
 import Data.Aeson
+import Data.Default
 
 import Dhall
 import Servant.API
@@ -34,6 +35,9 @@ data Demo = Demo
   , _demoPieces :: [Piece]
   }
   deriving (Generic, Show)
+
+instance Default Demo where
+  def = Demo def def
 
 instance Interpret Task
 instance ToJSON Task
