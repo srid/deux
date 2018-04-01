@@ -13,7 +13,8 @@ import Data.Aeson (FromJSON, ToJSON)
 import Data.Char (isUpper)
 import Data.Default
 import Data.Scientific
-import Data.Text.Lazy as TL
+import Data.Text.Lazy (Text)
+import qualified Data.Text.Lazy as TL
 import GHC.Generics
 
 import Dhall
@@ -62,4 +63,4 @@ instance Inject Demo
 instance ToJSON Demo
 instance FromJSON Demo
 
-type DemoAPI = "demo" :> Get '[JSON] Demo
+type DemoAPI = "demoe" :> Get '[JSON] (Either Text Demo)

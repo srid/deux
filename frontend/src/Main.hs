@@ -1,6 +1,7 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE GADTs #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE NoMonomorphismRestriction #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -8,11 +9,11 @@
 {-# LANGUAGE RecursiveDo #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE LambdaCase #-}
 module Main where
 
 import Control.Monad (forM_, join, (<=<))
 import Data.Bool (bool)
+import Data.Monoid ((<>))
 import Data.Proxy (Proxy (..))
 import Data.Set (fromList, toList)
 import qualified Data.Text.Lazy as T
@@ -43,12 +44,12 @@ app = container def $  do
 serverUrl :: BaseUrl
 serverUrl = BaseFullUrl Http "localhost" 3001 "/"
 
-serverEvt :: forall t m. MonadWidget t m => m (Event t (ReqResult () Demo))
+serverEvt :: forall t m. MonadWidget t m => m (Event t (ReqResult () (Either T.Text Demo)))
 serverEvt = do
   pb <- getPostBuild
-  demo $ () <$ pb
+  demoe $ () <$ pb
   where
-    demo = client
+    demoe = client
       (Proxy :: Proxy DemoAPI)
       (Proxy :: Proxy m)
       (Proxy :: Proxy ())
@@ -63,8 +64,15 @@ someWidget = do
   elAttr "p" ("style" =: "color:red") $
     dynText =<< holdDyn "" (leftmost [errs, const "" <$> ys])
 
-  widgetHold_ blank $ taskList <$> _demoTasks <$> ys
-  widgetHold_ blank $ pieceList <$> _demoPieces <$> ys
+  widgetHold_ (text "Loading...") $ ffor ys demo
+
+demo :: MonadWidget t m => Either T.Text Demo -> m ()
+demo = \case
+  Left e -> label def $ do
+    divClass "asis" $ text $ "oops:\n " <> T.toStrict e
+  Right d -> do
+    taskList $ _demoTasks d
+    pieceList $ _demoPieces d
 
 taskList :: MonadWidget t m => [Task] -> m ()
 taskList tasks = segment def $ do
