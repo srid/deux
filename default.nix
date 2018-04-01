@@ -98,8 +98,22 @@
     dhall-haskell = pkgs.fetchFromGitHub {
       owner = "dhall-lang";
       repo = "dhall-haskell";
-      rev = "7d7b8590b5ef82598bbf36e146a0c4c20e4dec04";
-      sha256 = "0kywaizrp4d7l7qfq0af70m95qn8mv5dkd1mw50vpjx3b8mar59h";
+      rev = "21355e7858c7210bb2011b5657e4aefd5bcf83de";
+      sha256 = "1qyrf2vfb9ca2n6s1c0r4pdsigi3zj824l9zzcyf31mvrrjlma0d";
+    };
+
+    megaparsec = pkgs.fetchFromGitHub {
+      owner = "mrkkrp";
+      repo = "megaparsec";
+      rev = "20646728cc9e8a073b7793b12865bba95b61d29e";
+      sha256 = "1728s0rm1mqh1104bh2s7m8nb97sli2xlag3cdi98mj3137w9i3b";
+    };
+
+    parser-combinators = pkgs.fetchFromGitHub {
+      owner = "mrkkrp";
+      repo = "parser-combinators";
+      rev = "dd6599224fe7eb224477ef8e9269602fb6b79fe0";
+      sha256 = "11cpfzlb6vl0r5i7vbhp147cfxds248fm5xq8pwxk92d1f5g9pxm";
     };
 
     formatting = pkgs.fetchFromGitHub {
@@ -118,8 +132,9 @@
   in
   {
     dhall = self.callCabal2nix "dhall" "${dhall-haskell}" {};
+    megaparsec = self.callCabal2nix "megaparsec" "${megaparsec}" {};
+    parser-combinators = self.callCabal2nix "parser-combinators" "${parser-combinators}" {};
     formatting = self.callCabal2nix "formatting" "${formatting}" {};
-    # prettyprinter = self.callCabal2nix "prettyprinter" "${prettyprinter}/prettyprinter" {};
     prettyprinter = self.callPackage "${dhall-haskell}/nix/prettyprinter.nix" {};
 
     diagrams-reflex = self.callPackage "${diagrams-reflex}" {};
