@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
 module Common.Finance where
@@ -16,19 +17,9 @@ data CostcoTransaction = CostcoTransaction
   , _costcotransactionCategory :: Text
   , _costcotransactionAmount :: Amount
   }
-  deriving (Generic, Show)
+  deriving (Generic, Show, Interpret, Inject, ToJSON, FromJSON)
 
 data Amount
   = Debit Scientific
   | Credit Scientific
-  deriving (Generic, Show)
-
-instance Interpret CostcoTransaction
-instance Inject CostcoTransaction
-instance ToJSON CostcoTransaction
-instance FromJSON CostcoTransaction
-
-instance Interpret Amount
-instance Inject Amount
-instance ToJSON Amount
-instance FromJSON Amount
+  deriving (Generic, Show, Interpret, Inject, ToJSON, FromJSON)

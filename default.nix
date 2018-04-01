@@ -95,11 +95,12 @@
       sha256 = "0mmypd6f3imh7bk6br9m9aj97k2yibz2bqcw3a5svp962zsjbkyp";
     };
 
+    # Pinning to PR <https://github.com/dhall-lang/dhall-haskell/issues/346> until it is merged.
     dhall-haskell = pkgs.fetchFromGitHub {
       owner = "dhall-lang";
       repo = "dhall-haskell";
-      rev = "21355e7858c7210bb2011b5657e4aefd5bcf83de";
-      sha256 = "1qyrf2vfb9ca2n6s1c0r4pdsigi3zj824l9zzcyf31mvrrjlma0d";
+      rev = "19d89c2e3c4189ab757a05d8e4d201e867efe318";
+      sha256 = "0sb8qm9glnlbamnbkvzixirmxgj4zz8wpqixklwl26sbjhb93sfx";
     };
 
     megaparsec = pkgs.fetchFromGitHub {

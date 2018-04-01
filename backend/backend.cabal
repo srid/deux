@@ -2,7 +2,7 @@
 -- documentation, see http://haskell.org/cabal/users-guide/
 
 name:                backend
-version:             0.1.0.0
+version:             0.1.1.0
 -- synopsis:            
 -- description:         
 license:             MIT
@@ -17,7 +17,9 @@ cabal-version:       >=1.10
 executable backend
   main-is: Main.hs
   ghc-options: -Wall -O2 -threaded -rtsopts -with-rtsopts=-N
-  -- other-modules:       
+  exposed-modules:
+      Backend
+    , Backend.Server
   -- other-extensions:    
   build-depends:
       base >=4.9 && <4.11

@@ -18,6 +18,8 @@ library
   ghc-options:         -Wall -O2
   exposed-modules:     Common
                      , Common.Finance
+                     , Common.Piece
+                     , Common.Task
   -- other-extensions:    
   build-depends:       base >=4.9 && <4.11
                      , text

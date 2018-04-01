@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
 module Common.Task where
@@ -15,9 +16,4 @@ data Task = Task
   , _taskContext :: [Text]
   , _taskDescription :: Text
   }
-  deriving (Generic, Show)
-
-instance Interpret Task
-instance Inject Task
-instance ToJSON Task
-instance FromJSON Task
+  deriving (Generic, Show, Interpret, Inject, ToJSON, FromJSON)

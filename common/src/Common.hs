@@ -1,4 +1,5 @@
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
@@ -31,7 +32,7 @@ data Demo = Demo
   { _demoTasks :: [Task]
   , _demoPieces :: [Piece]
   }
-  deriving (Generic, Show)
+  deriving (Generic, Show, Interpret, Inject, ToJSON, FromJSON)
 
 type DemoAPI = "demo" :> Get '[JSON] (Either Text Demo)
 
@@ -40,9 +41,5 @@ type DemoAPI = "demo" :> Get '[JSON] (Either Text Demo)
 interpretOptions :: InterpretOptions
 interpretOptions = defaultInterpretOptions { fieldModifier = f }
   where
-    f = TL.toLower . TL.dropWhile (not . isUpper)
-
-instance Interpret Demo
-instance Inject Demo
-instance ToJSON Demo
-instance FromJSON Demo
+    f "_1" = "_1"  -- Keep Dhall's sum type record fields as is.
+    f x = TL.toLower . TL.dropWhile (not . isUpper) $ x

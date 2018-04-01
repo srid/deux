@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -13,9 +14,4 @@ data Piece = Piece
   { _pieceTitle :: Text
   , _pieceBody :: Text
   }
-  deriving (Generic, Show)
-
-instance Interpret Piece
-instance Inject Piece
-instance ToJSON Piece
-instance FromJSON Piece
+  deriving (Generic, Show, Interpret, Inject, ToJSON, FromJSON)
