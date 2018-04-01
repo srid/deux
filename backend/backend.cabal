@@ -16,7 +16,7 @@ cabal-version:       >=1.10
 
 executable costco2dhall
   main-is: BankStatementToDhall.hs
-  build-depends: base, common, sv, bytestring, scientific
+  build-depends: base, common, sv, bytestring, scientific, validation
   hs-source-dirs: src-bin
   default-language:    Haskell2010
 
@@ -26,15 +26,19 @@ executable backend
   -- other-modules:       
   -- other-extensions:    
   build-depends:       base >=4.9 && <4.11
+                     , bytestring
                      , common
                      , dhall
+                     , scientific
                      , servant
                      , servant-server
                      , scotty
+                     , sv
                      , text
                      , wai
                      , wai-extra
                      , wai-cors
                      , warp
+                     , validation
   hs-source-dirs:      src
   default-language:    Haskell2010

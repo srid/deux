@@ -24,14 +24,7 @@ import Network.Wai.Middleware.RequestLogger (logStdoutDev)
 import Common
 import Common.Finance
 
-baseDir :: Text
-baseDir = "/home/srid/Dropbox/deuxContent/"
-
-readDhallFile :: Interpret a => Text -> IO a
-readDhallFile path = input (autoWith interpretOptions) $ baseDir <> path
-
-dumpDhall :: Inject a => a -> Text
-dumpDhall = pretty . embed (injectWith interpretOptions)
+import Backend
 
 server :: Server DemoAPI
 server = do
