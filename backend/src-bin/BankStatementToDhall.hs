@@ -1,12 +1,14 @@
-{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE LambdaCase #-}
 
 module Main where
 
 import Common.Finance
 
+import Data.Monoid ((<>))
 import Data.ByteString (ByteString)
 import Data.Sv
+import Data.Scientific
 import qualified Data.Sv.Decode as D
 
 costcoTransactionDecoder :: Decode' ByteString CostcoTransaction
@@ -18,12 +20,16 @@ costcoTransactionDecoder =
     <*> D.ignore -- card no
     <*> s
     <*> s
-    <*> D.orEmpty D.double -- TODO: Use Either here.
-    <*> D.orEmpty D.double
+    <*> D.orEmpty D.string
+    <*> D.orEmpty D.string
   where
     s = D.lazyUtf8
     -- XXX: remove this ugliness
-    mk () a () () b c d e = CostcoTransaction a b c d e
+    mk () a () () b c d e = CostcoTransaction a b c $ toAmount d e
+    toAmount (Just x) Nothing = Debit $ read x
+    toAmount Nothing (Just x) = Credit $ read x
+    toAmount x y = error $ -- FIXME: How do I combine columns in sv?
+      "Invalid combination: " <> show x <> ", " <> show y
 
 transactions :: IO (DecodeValidation ByteString [CostcoTransaction])
 transactions = parseDecodeFromFile' attoparsecByteString costcoTransactionDecoder defaultParseOptions demoFile

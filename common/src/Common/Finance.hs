@@ -23,12 +23,21 @@ data CostcoTransaction = CostcoTransaction
   { _costcotransactionTransactionDate :: Text
   , _costcotransactionDescription :: Text
   , _costcotransactionCategory :: Text
-  , _costcotransactionDebit :: Maybe Double
-  , _costcotransactionCredit :: Maybe Double
+  , _costcotransactionAmount :: Amount
   }
+  deriving (Generic, Show)
+
+data Amount
+  = Debit Scientific
+  | Credit Scientific
   deriving (Generic, Show)
 
 instance Interpret CostcoTransaction
 instance Inject CostcoTransaction
 instance ToJSON CostcoTransaction
 instance FromJSON CostcoTransaction
+
+instance Interpret Amount
+instance Inject Amount
+instance ToJSON Amount
+instance FromJSON Amount

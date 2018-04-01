@@ -94,8 +94,34 @@
       rev    = "7858d626b198621bc674fbc235c7980fb4002f78";
       sha256 = "0mmypd6f3imh7bk6br9m9aj97k2yibz2bqcw3a5svp962zsjbkyp";
     };
+
+    dhall-haskell = pkgs.fetchFromGitHub {
+      owner = "dhall-lang";
+      repo = "dhall-haskell";
+      rev = "7d7b8590b5ef82598bbf36e146a0c4c20e4dec04";
+      sha256 = "0kywaizrp4d7l7qfq0af70m95qn8mv5dkd1mw50vpjx3b8mar59h";
+    };
+
+    formatting = pkgs.fetchFromGitHub {
+      owner = "chrisdone";
+      repo = "formatting";
+      rev = "14f04ce3fadbf7a0c3d2a7fe0b35f154de9f7c39";
+      sha256 = "1n5mfcxwxrk177x1gsllyc7dsks8jn5wvs4sb8hj7pawgq1frkbp";
+    };
+
+    prettyprinter = pkgs.fetchFromGitHub {
+      owner = "quchen";
+      repo = "prettyprinter";
+      rev = "6a45f4ebe1087cd1939554fc79d49a8c073f3cd6";
+      sha256 = "0phzm34figj1c1h9s9cdhkdwaz7ascf7gfkclr3lccmp579z355z";
+    };
   in
   {
+    dhall = self.callCabal2nix "dhall" "${dhall-haskell}" {};
+    formatting = self.callCabal2nix "formatting" "${formatting}" {};
+    # prettyprinter = self.callCabal2nix "prettyprinter" "${prettyprinter}/prettyprinter" {};
+    prettyprinter = self.callPackage "${dhall-haskell}/nix/prettyprinter.nix" {};
+
     diagrams-reflex = self.callPackage "${diagrams-reflex}" {};
     reflex-dom-contrib = self.callCabal2nix "reflex-dom-contrib" "${reflex-dom-contrib}" {};
     semantic-reflex = self.callCabal2nix "semantic-reflex" "${semantic-reflex}/semantic-reflex" {};

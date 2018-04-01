@@ -16,7 +16,7 @@ cabal-version:       >=1.10
 
 executable costco2dhall
   main-is: BankStatementToDhall.hs
-  build-depends: base, common, sv, bytestring
+  build-depends: base, common, sv, bytestring, scientific
   hs-source-dirs: src-bin
   default-language:    Haskell2010
 
