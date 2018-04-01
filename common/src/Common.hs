@@ -1,18 +1,21 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeOperators #-}
-module Common where
+module Common
+  ( Demo(..)
+  , DemoAPI
+  , interpretOptions
+  , module Common.Piece
+  , module Common.Task
+  )where
 
 import Data.Aeson (FromJSON, ToJSON)
 import Data.Char (isUpper)
-import Data.Default
-import Data.Scientific
 import Data.Text.Lazy (Text)
 import qualified Data.Text.Lazy as TL
 import GHC.Generics
@@ -20,47 +23,26 @@ import GHC.Generics
 import Dhall
 import Servant.API
 
-data Task = Task
-  { _taskTitle :: Text
-  , _taskDone :: Bool
-  , _taskContext :: [Text]
-  , _taskDescription :: Text
-  }
-  deriving (Generic, Show)
+import Common.Piece
+import Common.Task
 
-data Piece = Piece
-  { _pieceTitle :: Text
-  , _pieceBody :: Text
-  }
-  deriving (Generic, Show)
-
+-- TODO: Rename Demo to something meaningful
 data Demo = Demo
   { _demoTasks :: [Task]
   , _demoPieces :: [Piece]
   }
   deriving (Generic, Show)
 
-instance Default Demo where
-  def = Demo def def
+type DemoAPI = "demo" :> Get '[JSON] (Either Text Demo)
 
+-- Follow record field naming conventions in this project when converting back
+-- and forth from Dhall fields.
 interpretOptions :: InterpretOptions
 interpretOptions = defaultInterpretOptions { fieldModifier = f }
   where
     f = TL.toLower . TL.dropWhile (not . isUpper)
 
-instance Interpret Task
-instance Inject Task
-instance ToJSON Task
-instance FromJSON Task
-
-instance Interpret Piece
-instance Inject Piece
-instance ToJSON Piece
-instance FromJSON Piece
-
 instance Interpret Demo
 instance Inject Demo
 instance ToJSON Demo
 instance FromJSON Demo
-
-type DemoAPI = "demoe" :> Get '[JSON] (Either Text Demo)
