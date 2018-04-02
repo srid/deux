@@ -6,12 +6,14 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
 module Backend.Server where
 
 import Data.Bifunctor (first)
 import Control.Exception (try, SomeException)
 import Control.Monad.IO.Class (liftIO)
+import Control.Monad.Reader
 
 import Data.Text.Lazy as T
 
@@ -28,7 +30,7 @@ import Backend
 server :: Server DemoAPI
 server = do
   liftIO $ do
-    r :: Either SomeException Demo <- try parseDemo
+    r :: Either SomeException Demo <- try parseDemo'
     return $ first (T.pack . show) r
 
 demoAPI :: Proxy DemoAPI

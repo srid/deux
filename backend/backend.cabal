@@ -26,6 +26,8 @@ executable backend
     , bytestring
     , common
     , dhall
+    , lifted-async
+    , lifted-base
     , scientific
     , scotty
     , servant
