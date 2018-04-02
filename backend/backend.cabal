@@ -29,7 +29,6 @@ executable backend
     , lifted-async
     , lifted-base
     , scientific
-    , scotty
     , servant
     , servant-server
     , sv

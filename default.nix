@@ -46,11 +46,72 @@
       sha256 = "0c18ylawg9xnj12hahzp3nwf7vs05rjpvdmwk1nna5z8yy661xkz";
     };
 
+    # Not using v0.13 as they require latest http-types which jsaddle doesn't work with.
+    servant= pkgs.fetchFromGitHub {
+      owner = "haskell-servant";
+      repo = "servant";
+      rev = "7e9910b27ee42c635bb71f87bbdaa6056ab22c23";
+      # rev = "1d55429f25ca28b750fd52926e4321cfe19dbf0e"; # v0.13
+      sha256 = "0j2j6x8wdc3jzpixaq4wrpb4873bj4jvqmfbhcybdqx8cl8v36yp";
+    };
+
+    aeson = pkgs.fetchFromGitHub {
+      owner = "bos";
+      repo = "aeson";
+      rev = "8e58f82db806424ea3690ed1637375f2aadc7940";
+      sha256 = "0i62cx7i26zhr93cbajkv4qh3d7f00wxp06j6wy67xsmrf44m1dm";
+    };
+
+    attoparsec = pkgs.fetchFromGitHub {
+      owner = "bos";
+      repo = "attoparsec";
+      rev = "c8030ed56df344b4c7238e58c5349e64f70c7bc9";
+      sha256 = "1v94nwkm050vwhsv55rvw0d8syvivx7f6b6wz04lss3pfcrj4qwl";
+    };
+
+    base-compat = pkgs.fetchFromGitHub {
+      owner = "haskell-compat";
+      repo = "base-compat";
+      rev = "877917365da629da7f76afa35ff99524504603dd";
+      sha256 = "1nski1fg9ba9xadr57656lj1w01lq95ljcf6m6zq4mm3qdm0x3nh";
+    };
+
+    http-media = pkgs.fetchFromGitHub {
+      owner = "zmthy";
+      repo = "http-media";
+      rev = "501f8c0b90fe2f1675f7d19f32bc7c5b4a67c7bb";
+      sha256 = "1rjxk0r09xh2m2f8wyzhhvmmdfmlbmn7s126vgkdxkqanarf0m46";
+    };
+
+    http-types = pkgs.fetchFromGitHub {
+      owner = "aristidb";
+      repo = "http-types";
+      rev = "7461df39467dc1dd2bb9697c50f186d196551dde";
+      sha256 = "0law0hwspwgy2hga7zphmaqqbfgklfpb2pf813ycgqnq1fzaai0m";
+    };
+
+    mmorph = pkgs.fetchFromGitHub {
+      owner = "Gabriel439";
+      repo = "Haskell-MMorph-Library";
+      rev = "c557fd52358d15c395c33b63a2e7e318160d735c";
+      sha256 = "0a96q893zzj8zsq815qzmk341ykjdk7qh8rpp541hj40f53k55ir";
+    };
+
+    text = pkgs.fetchFromGitHub {
+      owner = "haskell";
+      repo = "text";
+      rev = "a02c2dafafa425bd5f36c8629e98b98daf1cfa1e";
+      sha256 = "0rh9mb023f0s56ylzxz9c3c1y09lpl6m69ap5bnpdi0dz7fm6s85";
+    };
+
+    # Forked servant-reflex to relax cabal version constraints
     servant-reflex = pkgs.fetchFromGitHub {
-      owner = "imalsogreg";
+      owner = "srid";
       repo = "servant-reflex";
-      rev = "2996dbc8e0922e29939d05ac647b897650ab64a8";
-      sha256 = "03880y11yfmmxk1s35wdqzghm4pcq44qm4hcw0577mmi4gdva8vi";
+      rev = "7ad155b6ed07ef23bfe57235bd5ccfb60b22bcfb";
+      # upstream  - rev = "2996dbc8e0922e29939d05ac647b897650ab64a8";
+      # sha256 = "03880y11yfmmxk1s35wdqzghm4pcq44qm4hcw0577mmi4gdva8vi";
+      sha256 = "1r829j3qy7vwcng7xpwfp2w5605i43w5x8g5skgd1iz7a5mfmq5i";
     };
 
     servant-auth = pkgs.fetchFromGitHub {
@@ -130,6 +191,8 @@
       rev = "6a45f4ebe1087cd1939554fc79d49a8c073f3cd6";
       sha256 = "0phzm34figj1c1h9s9cdhkdwaz7ascf7gfkclr3lccmp579z355z";
     };
+
+    skipTest = pkgs.haskell.lib.dontCheck;
   in
   {
     dhall = self.callCabal2nix "dhall" "${dhall-haskell}" {};
@@ -141,8 +204,21 @@
     diagrams-reflex = self.callPackage "${diagrams-reflex}" {};
     reflex-dom-contrib = self.callCabal2nix "reflex-dom-contrib" "${reflex-dom-contrib}" {};
     semantic-reflex = self.callCabal2nix "semantic-reflex" "${semantic-reflex}/semantic-reflex" {};
+
+    servant = skipTest (self.callCabal2nix "servant" "${servant}/servant" {});
+    servant-server = self.callCabal2nix "servant-server" "${servant}/servant-server" {};
+    servant-client = self.callCabal2nix "servant-client" "${servant}/servant-client" {};
+    servant-client-core = self.callCabal2nix "servant-client-core" "${servant}/servant-client-core" {};
+    servant-client-ghcjs = self.callCabal2nix "servant-client-ghcjs" "${servant}/servant-client-ghcjs" {};
     servant-reflex = self.callCabal2nix "servant-reflex" "${servant-reflex}" {};
     servant-auth = self.callCabal2nix "servant-auth" "${servant-auth}/servant-auth" {};
+    base-compat = skipTest (self.callCabal2nix "base-compat" "${base-compat}" {});
+    aeson = skipTest (self.callCabal2nix "aeson" "${aeson}" {});
+    attoparsec = skipTest (self.callCabal2nix "attoparsec" "${attoparsec}" {});
+    http-media = skipTest (self.callCabal2nix "http-media" "${http-media}" {});
+    # http-types = skipTest (self.callCabal2nix "http-types" "${http-types}" {});
+    text = self.callCabal2nix "text" "${text}" {};
+    mmorph = self.callCabal2nix "mmorph" "${mmorph}" {};
     Glob = self.callCabal2nix "Glob" "${glob}" {};
     # validation = pkgs.haskell.lib.dontCheck pkgs.haskellPackages.validation;
 

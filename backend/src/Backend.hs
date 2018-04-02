@@ -1,24 +1,19 @@
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeOperators #-}
-{-# LANGUAGE FlexibleContexts #-}
 module Backend where
 
+import Control.Monad.Reader
 import Data.ByteString (ByteString)
 import Data.Monoid ((<>))
 import Data.Sv
 import qualified Data.Sv.Decode as D
-import qualified Data.Text as T
-import qualified Data.Text.Lazy.IO as TIO
-import Control.Concurrent.Async.Lifted.Safe
-import Control.Monad.Reader
-import Control.Concurrent.STM
 
-import qualified Data.Validation as V
 import Dhall
 import Dhall.Core (pretty)
 
@@ -26,26 +21,17 @@ import Common
 import Common.Finance
 
 data Env = Env
-  { envDhallDataDir :: !T.Text
-  , envDemoFile :: !T.Text
+  { envDhallDataDir :: !Text
+  , envDemoFile :: !FilePath
   }
-
--- TODO: Read this from config file.
--- Perhaps use this opportunity to use 'three layer cake' from now
-baseDir :: Text
-baseDir = "/home/srid/Dropbox/Documents/"
-
-demoFile :: FilePath
-demoFile = "/home/srid/Dropbox/Documents/2018/BankStatements/CapitalOne/Stmnt_022018_4997.csv"
 
 readDhallFile
   :: (Functor m, MonadReader Env m, MonadIO m, Interpret a)
   => Text -> m a
-readDhallFile = liftIO . readDhallFile'
-
--- TODO: Figure out servant readderT and get rid of this hack
-readDhallFile' :: Interpret a => Text -> IO a
-readDhallFile' path = liftIO $ input (autoWith interpretOptions) $ baseDir <> path
+readDhallFile path = do
+  e :: Env <- ask
+  let p = (envDhallDataDir e) <> path
+  liftIO $ input (autoWith interpretOptions) p
 
 dumpDhall :: Inject a => a -> Text
 dumpDhall = pretty . embed (injectWith interpretOptions)
@@ -54,15 +40,11 @@ parseDemo
   :: (Functor m, MonadReader Env m, MonadIO m)
   => m Demo
 parseDemo = do
-  liftIO $ parseDemo'
-
-parseDemo' :: IO Demo
-parseDemo' = do
-  putStrLn "Reading dhall files"
-  tasks :: [Task] <- readDhallFile' "Inbox.dhall"
-  pieces :: [Piece] <- readDhallFile' "Piece.dhall"
+  liftIO $ putStrLn "Reading dhall files..."
+  tasks :: [Task] <- readDhallFile "Inbox.dhall"
+  pieces :: [Piece] <- readDhallFile "Piece.dhall"
   return $ Demo tasks pieces
-
+  -- liftIO $ parseDemo'
 costcoTransactionDecoder :: Decode' ByteString CostcoTransaction
 costcoTransactionDecoder =
   CostcoTransaction
@@ -74,12 +56,13 @@ costcoTransactionDecoder =
   where
     s = D.lazyUtf8
 
-transactions :: IO (DecodeValidation ByteString [CostcoTransaction])
-transactions = parseDecodeFromFile' attoparsecByteString costcoTransactionDecoder defaultParseOptions demoFile
-
-dumpTmp :: IO ()
-dumpTmp = do
-  txs' <- transactions
-  let (Right txs) = V.toEither txs'
-  TIO.writeFile "/tmp/txs.dhall" $ dumpDhall txs
-
+transactions
+  :: (Functor m, MonadReader Env m, MonadIO m)
+  => m (DecodeValidation ByteString [CostcoTransaction])
+transactions = do
+  e <- ask
+  parseDecodeFromFile'
+    attoparsecByteString
+    costcoTransactionDecoder
+    defaultParseOptions
+    (envDemoFile e)
