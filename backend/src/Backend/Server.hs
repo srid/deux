@@ -9,7 +9,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
-module Backend.Server where
+module Backend.Server (runServer) where
 
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Reader

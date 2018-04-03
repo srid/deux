@@ -8,7 +8,8 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeOperators #-}
 module Common
-  ( Demo(..)
+  ( Env(..)
+  , Demo(..)
   , DemoAPI
   , interpretOptions
   , module Common.Piece
@@ -26,6 +27,11 @@ import Servant.API
 
 import Common.Piece
 import Common.Task
+
+data Env = Env
+  { _envDhallDataDir :: !Text
+  , _envDemoFile :: !FilePath
+  }
 
 -- TODO: Rename Demo to something meaningful
 data Demo = Demo
