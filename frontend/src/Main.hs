@@ -24,10 +24,10 @@ import Servant.Reflex
 
 import qualified Language.Javascript.JSaddle.Warp as JW
 import Reflex.Dom hiding (button, mainWidgetWithCss, _dropdown_value)
-
 import Reflex.Dom.SemanticUI
 
 import Common
+import Frontend.Common (withWorkflow)
 
 -- TODO: Start using ReaderT
 serverUrl :: BaseUrl
@@ -51,7 +51,8 @@ app = container def $  do
   elAttr "p" ("style" =: "color:red") $
     dynText =<< holdDyn "" (leftmost [errs, const "" <$> ys])
 
-  widgetHold_ (text "Loading...") $ ffor ys demoUI
+  widgetHold_ (text "Loading...") $ ffor ys $
+    fmap (const ()) . workflowView . demoUI
 
 demoClient
   :: forall t m. MonadWidget t m
@@ -65,16 +66,28 @@ demoClient = client
 
 demoUI
   :: ( UI t m
+     , MonadWidget t m
      , DomBuilderSpace m ~ GhcjsDomSpace
      , MonadJSM (Performable m)
      , MonadJSM m)
-  => Either TL.Text Demo -> m ()
+  => Either TL.Text Demo -> Workflow t m ()
 demoUI = \case
-  Left e -> label def $ do
+  Left e -> withWorkflow $ do
+    label def $ do
     divClass "asis" $ text $ "oops:\n " <> TL.toStrict e
-  Right d -> do
+    return never
+  Right d -> withWorkflow $ do
     taskList $ _demoTasks d
     pieceList $ _demoPieces d
+    return never
+
+pieceList :: UI t m => [Piece] -> m ()
+pieceList pieces = segment def $ do
+  header (def & headerSize |?~ H2) $ text "Pieces"
+  forM_ pieces $ \piece -> do
+    header (def & headerSize |?~ H3) $ do
+      text $ TL.toStrict $ _pieceTitle piece
+    note $ _pieceBody piece
 
 taskList
   :: ( UI t m
@@ -138,19 +151,6 @@ toggleButton s = do
   return viewNote
 
 
-pieceList :: UI t m => [Piece] -> m ()
-pieceList pieces = segment def $ do
-  header (def & headerSize |?~ H2) $ text "Pieces"
-  forM_ pieces $ \piece -> do
-    header (def & headerSize |?~ H3) $ do
-      text $ TL.toStrict $ _pieceTitle piece
-    note $ _pieceBody piece
-
 note :: UI t m => TL.Text -> m ()
 note = segment def . divClass "asis" . text . TL.toStrict
 
-(<<$>>) :: (Functor f2, Functor f1) => (a -> b) -> f1 (f2 a) -> f1 (f2 b)
-(<<$>>) = fmap . fmap
-
-(<<$) :: (Functor f2, Functor f1) => a -> f1 (f2 b) -> f1 (f2 a)
-v <<$ f = fmap (v <$) f
