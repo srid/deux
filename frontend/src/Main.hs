@@ -16,8 +16,10 @@ import Data.Bool (bool)
 import Data.Monoid ((<>))
 import Data.Proxy (Proxy (..))
 import Data.Set (fromList, toList)
-import qualified Data.Text.Lazy as T
+import qualified Data.Text as T
+import qualified Data.Text.Lazy as TL
 
+import GHCJS.DOM.Types (MonadJSM)
 import Servant.Reflex
 
 import qualified Language.Javascript.JSaddle.Warp as JW
@@ -26,6 +28,10 @@ import Reflex.Dom hiding (button, mainWidgetWithCss, _dropdown_value)
 import Reflex.Dom.SemanticUI
 
 import Common
+
+-- TODO: Start using ReaderT
+serverUrl :: BaseUrl
+serverUrl = BaseFullUrl Http "localhost" 3001 "/"
 
 main :: IO ()
 main = do
@@ -38,43 +44,44 @@ main = do
 
 app :: MonadWidget t m => m ()
 app = container def $  do
-  someWidget
-  return ()
-
-serverUrl :: BaseUrl
-serverUrl = BaseFullUrl Http "localhost" 3001 "/"
-
-serverEvt :: forall t m. MonadWidget t m => m (Event t (ReqResult () (Either T.Text Demo)))
-serverEvt = do
-  pb <- getPostBuild
-  demoe $ () <$ pb
-  where
-    demoe = client
-      (Proxy :: Proxy DemoAPI)
-      (Proxy :: Proxy m)
-      (Proxy :: Proxy ())
-      (constDyn serverUrl)
-
-someWidget :: forall t m. MonadWidget t m => m ()
-someWidget = do
-  result <- serverEvt
+  result <- getPostBuild >>= demoClient . fmap (const ())
   let ys = fmapMaybe reqSuccess result
       errs = fmapMaybe reqFailure result
 
   elAttr "p" ("style" =: "color:red") $
     dynText =<< holdDyn "" (leftmost [errs, const "" <$> ys])
 
-  widgetHold_ (text "Loading...") $ ffor ys demo
+  widgetHold_ (text "Loading...") $ ffor ys demoUI
 
-demo :: MonadWidget t m => Either T.Text Demo -> m ()
-demo = \case
+demoClient
+  :: forall t m. MonadWidget t m
+  => Event t ()
+  -> m (Event t (ReqResult () (Either TL.Text Demo)))
+demoClient = client
+  (Proxy :: Proxy DemoAPI)
+  (Proxy :: Proxy m)
+  (Proxy :: Proxy ())
+  (constDyn serverUrl)
+
+demoUI
+  :: ( UI t m
+     , DomBuilderSpace m ~ GhcjsDomSpace
+     , MonadJSM (Performable m)
+     , MonadJSM m)
+  => Either TL.Text Demo -> m ()
+demoUI = \case
   Left e -> label def $ do
-    divClass "asis" $ text $ "oops:\n " <> T.toStrict e
+    divClass "asis" $ text $ "oops:\n " <> TL.toStrict e
   Right d -> do
     taskList $ _demoTasks d
     pieceList $ _demoPieces d
 
-taskList :: MonadWidget t m => [Task] -> m ()
+taskList
+  :: ( UI t m
+     , DomBuilderSpace m ~ GhcjsDomSpace
+     , MonadJSM (Performable m)
+     , MonadJSM m)
+  => [Task] -> m ()
 taskList tasks = segment def $ do
   header (def & headerSize |?~ H2) $ text "Current tasks"
   ctxQuery <- taskFilter $ allContexts tasks
@@ -85,47 +92,62 @@ taskList tasks = segment def $ do
           then task t
           else blank
 
-matchCtx :: T.Text -> Task -> Bool
+matchCtx :: TL.Text -> Task -> Bool
 matchCtx c t = case c of
   "" -> True
-  _ -> any (T.isInfixOf c) $ _taskContext t
+  _ -> any (TL.isInfixOf c) $ _taskContext t
 
-allContexts :: [Task] -> [T.Text]
+allContexts :: [Task] -> [TL.Text]
 allContexts = toList . fromList . join . fmap _taskContext
 
-taskFilter :: MonadWidget t m => [T.Text] -> m (Dynamic t T.Text)
-taskFilter ctxs = do
-  d <- _dropdown_value <<$>> searchDropdown def "" $ TaggedStatic $ T.toStrict <$> ctxs
-  return $ T.fromStrict <$> d
+taskFilter
+  :: ( UI t m
+     , DomBuilderSpace m ~ GhcjsDomSpace
+     , MonadJSM (Performable m)
+     , MonadJSM m)
+  => [TL.Text] -> m (Dynamic t TL.Text)
+taskFilter = toLazy . f . toStrict
+  where
+    f = fmap _dropdown_value . searchDropdown def "" . TaggedStatic
+    toStrict = fmap TL.toStrict
+    toLazy = fmap . fmap $ TL.fromStrict
 
-task :: MonadWidget t m => Task -> m ()
+task :: UI t m => Task -> m ()
 task (Task s _done ctx desc) = do
   label (def & labelLink .~ True & labelColor |?~ Teal
-              & labelRibbon |?~ LeftRibbon) $ text $ T.toStrict $ T.pack $ show ctx
+             & labelRibbon |?~ LeftRibbon) $
+    text $ TL.toStrict $ TL.pack $ show ctx
 
-  rec let conf = def
-            & buttonFloated |?~ RightFloated
-            & buttonEmphasis .~ Dyn (bool Nothing (Just Primary) <$> viewNote)
-      viewNote <- if desc /= ""
-                     then toggle False <=< button conf $ text "Toggle Notes"
-                     else return $ constDyn False
+  text $ TL.toStrict s
 
-  text $ T.toStrict s
+  viewNote <- if desc /= ""
+    then toggleButton "Toggle Notes"
+    else return $ pure False
+
   dyn_ $ ffor viewNote $ \case
     True -> note desc
     False -> blank
   divider def
 
-pieceList :: MonadWidget t m => [Piece] -> m ()
+toggleButton :: UI t m => T.Text -> m (Dynamic t Bool)
+toggleButton s = do
+  rec let conf = def
+            & buttonFloated |?~ RightFloated
+            & buttonEmphasis .~ Dyn (bool Nothing (Just Primary) <$> viewNote)
+      viewNote <- toggle False <=< button conf $ text s
+  return viewNote
+
+
+pieceList :: UI t m => [Piece] -> m ()
 pieceList pieces = segment def $ do
   header (def & headerSize |?~ H2) $ text "Pieces"
   forM_ pieces $ \piece -> do
     header (def & headerSize |?~ H3) $ do
-      text $ T.toStrict $ _pieceTitle piece
+      text $ TL.toStrict $ _pieceTitle piece
     note $ _pieceBody piece
 
-note :: UI t m => T.Text -> m ()
-note = segment def . divClass "asis" . text . T.toStrict
+note :: UI t m => TL.Text -> m ()
+note = segment def . divClass "asis" . text . TL.toStrict
 
 (<<$>>) :: (Functor f2, Functor f1) => (a -> b) -> f1 (f2 a) -> f1 (f2 b)
 (<<$>>) = fmap . fmap
