@@ -24,6 +24,7 @@ executable backend
   build-depends:
       base >=4.9 && <4.11
     , bytestring
+    , cmdargs
     , common
     , dhall
     , lifted-async

@@ -13,6 +13,7 @@ module Backend.Server (runServer) where
 
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Reader
+import Data.Monoid ((<>))
 
 import Data.Text.Lazy as T
 
@@ -52,5 +53,10 @@ runServer
   => m ()
 runServer = do
   e <- ask
+  liftIO $ putStrLn $ "Config: " <> show e
+
+  -- Parse once and fail (for ghcid)
+  _ <- parseDemo
+
   liftIO $ putStrLn "Running server at http://localhost:3001/"
   liftIO $ run 3001 $ simpleCors $ logStdoutDev $ app e

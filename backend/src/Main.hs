@@ -1,4 +1,5 @@
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
@@ -9,28 +10,36 @@
 module Main where
 
 import Control.Monad.Reader
+import System.Console.CmdArgs
+import System.Directory (getHomeDirectory)
+import System.FilePath ((</>))
 
-import Common (Env(Env))
+import Control.Lens.Operators ((<&>))
+
+import Common (Env (Env))
 
 import Backend
+import qualified Backend.Finance as Finance
 import qualified Backend.Server as Server
-import Backend.Finance (dumpTmp)
 
-app :: (Functor m, MonadReader Env m, MonadIO m) => m ()
-app = do
-  _ <- parseDemo
-  Server.runServer
+data BackendApp
+  = BackendApp_Server {}
+  | BackendApp_ImportCostcoCsv {}
+  deriving (Data,Typeable,Show,Eq)
 
 main :: IO ()
-main = main' True
+main = do
+  cmd <- cmdArgs $ modes
+    [ BackendApp_Server
+      {} &= help "Run the backend API server" &= auto
+    , BackendApp_ImportCostcoCsv
+      {} &= help "Convert Costco bank statement to dhall file"
+    ]
+    &= help "Deux backend" &= program "backend" &= summary "Backend [dev]"
 
-main' :: Bool -> IO ()
-main' shouldServe = do
-  -- TODO: Read from configuration file
-  let env = Env
-        "/home/srid/Dropbox/Documents/"
-        "/home/srid/Dropbox/Documents/2018/BankStatements/CapitalOne/Stmnt_022018_4997.csv"
-  -- TODO: Replace this ugliness with cli arg parser
-  case shouldServe of
-    True -> runReaderT app env
-    False -> runReaderT dumpTmp env
+  case cmd of
+    BackendApp_Server -> do
+      dhallDir <- getHomeDirectory <&> (</> "Dropbox" </> "Documents")
+      runReaderT Server.runServer $ Env dhallDir
+    BackendApp_ImportCostcoCsv ->
+      runReaderT Finance.dumpTmp $ Env "EMPTYXXX" -- TODO: Use separate config

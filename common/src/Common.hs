@@ -29,9 +29,9 @@ import Common.Piece
 import Common.Task
 
 data Env = Env
-  { _envDhallDataDir :: !Text
-  , _envDemoFile :: !FilePath
+  { _envDhallDataDir :: !FilePath
   }
+  deriving (Generic, Show, Eq)
 
 -- TODO: Rename Demo to something meaningful
 data Demo = Demo

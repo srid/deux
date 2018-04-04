@@ -9,7 +9,8 @@
 module Backend where
 
 import Control.Monad.Reader
-import Data.Monoid ((<>))
+import qualified Data.Text.Lazy as TL
+import System.FilePath ((</>))
 
 import Dhall
 import Dhall.Core (pretty)
@@ -18,10 +19,11 @@ import Common
 
 readDhallFile
   :: (Functor m, MonadReader Env m, MonadIO m, Interpret a)
-  => Text -> m a
+  => FilePath -> m a
 readDhallFile path = do
   baseDir <- reader _envDhallDataDir
-  liftIO $ input (autoWith interpretOptions) $ baseDir <> path
+  liftIO $ input (autoWith interpretOptions) $
+    TL.pack $ baseDir </> path
 
 dumpDhall :: Inject a => a -> Text
 dumpDhall = pretty . embed (injectWith interpretOptions)
