@@ -18,8 +18,10 @@ executable backend
   main-is: Main.hs
   ghc-options: -Wall -O2 -threaded -rtsopts -with-rtsopts=-N
   exposed-modules:
-      Backend
+      Main
+    , Backend
     , Backend.Server
+    , Backend.Finance
   -- other-extensions:    
   build-depends:
       base >=4.9 && <4.11
@@ -27,8 +29,12 @@ executable backend
     , cmdargs
     , common
     , dhall
+    , directory
+    , filepath
+    , lens
     , lifted-async
     , lifted-base
+    , mtl
     , scientific
     , servant
     , servant-server

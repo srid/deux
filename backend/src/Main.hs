@@ -18,7 +18,6 @@ import Control.Lens.Operators ((<&>))
 
 import Common (Env (Env))
 
-import Backend
 import qualified Backend.Finance as Finance
 import qualified Backend.Server as Server
 
@@ -42,4 +41,4 @@ main = do
       dhallDir <- getHomeDirectory <&> (</> "Dropbox" </> "Documents")
       runReaderT Server.runServer $ Env dhallDir
     BackendApp_ImportCostcoCsv ->
-      runReaderT Finance.dumpTmp $ Env "EMPTYXXX" -- TODO: Use separate config
+      runReaderT Finance.dumpTmp ()
