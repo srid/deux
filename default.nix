@@ -42,8 +42,8 @@
     semantic-reflex = pkgs.fetchFromGitHub {
       owner = "tomsmalley";
       repo = "semantic-reflex";
-      rev = "7946d5f43ffce2c4cb090e315bb391af86e66276";
-      sha256 = "0c18ylawg9xnj12hahzp3nwf7vs05rjpvdmwk1nna5z8yy661xkz";
+      rev = "f5784d4f8d215cb2e6a1492d0b1c80baecc5056b";
+      sha256 = "0qk9cvna56308h0pvxm340rvp5gqzy9dpydn4ihkfd4987m5lyhn";
     };
 
     # Not using v0.13 as they require latest http-types which jsaddle doesn't work with.
