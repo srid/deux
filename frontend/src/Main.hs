@@ -27,11 +27,16 @@ import Reflex.Dom hiding (button, mainWidgetWithCss, _dropdown_value)
 import Reflex.Dom.SemanticUI
 
 import Common
-import Frontend.Common (withWorkflow)
+import Frontend.Common (withWorkflow, tabs_)
 
 -- TODO: Start using ReaderT
 serverUrl :: BaseUrl
 serverUrl = BaseFullUrl Http "localhost" 3001 "/"
+
+data Tab
+  = Tab_Tasks
+  | Tab_Pieces
+  deriving (Eq, Show, Ord)
 
 main :: IO ()
 main = do
@@ -51,8 +56,17 @@ app = container def $  do
   elAttr "p" ("style" =: "color:red") $
     dynText =<< holdDyn "" (leftmost [errs, const "" <$> ys])
 
-  widgetHold_ (text "Loading...") $ ffor ys $
-    fmap (const ()) . workflowView . demoUI
+  widgetHold_ (text "Loading...") $ ffor ys $ \case
+    Left e -> do
+      label def $ do
+      divClass "asis" $ text $ "oops:\n " <> TL.toStrict e
+    Right d -> do
+      tabs_ Tab_Tasks
+        [ (Tab_Tasks, text "Tasks")
+        , (Tab_Pieces, text "Pieces")
+        ] $ \case
+        Tab_Tasks -> workflowView $ taskList $ _demoTasks d
+        Tab_Pieces -> workflowView $ pieceList $ _demoPieces d
 
 demoClient
   :: forall t m. MonadWidget t m
@@ -64,46 +78,32 @@ demoClient = client
   (Proxy :: Proxy ())
   (constDyn serverUrl)
 
-demoUI
-  :: ( UI t m
-     , MonadWidget t m
-     , DomBuilderSpace m ~ GhcjsDomSpace
-     , MonadJSM (Performable m)
-     , MonadJSM m)
-  => Either TL.Text Demo -> Workflow t m ()
-demoUI = \case
-  Left e -> withWorkflow $ do
-    label def $ do
-    divClass "asis" $ text $ "oops:\n " <> TL.toStrict e
-    return never
-  Right d -> withWorkflow $ do
-    taskList $ _demoTasks d
-    pieceList $ _demoPieces d
-    return never
-
-pieceList :: UI t m => [Piece] -> m ()
-pieceList pieces = segment def $ do
-  header (def & headerSize |?~ H2) $ text "Pieces"
+pieceList :: UI t m => [Piece] -> Workflow t m ()
+pieceList pieces = withWorkflow $ segment def $ do
+  header (def & headerConfig_size |?~ H2) $ text "Pieces"
   forM_ pieces $ \piece -> do
-    header (def & headerSize |?~ H3) $ do
+    header (def & headerConfig_size |?~ H3) $ do
       text $ TL.toStrict $ _pieceTitle piece
     note $ _pieceBody piece
+  return never
 
 taskList
   :: ( UI t m
      , DomBuilderSpace m ~ GhcjsDomSpace
      , MonadJSM (Performable m)
      , MonadJSM m)
-  => [Task] -> m ()
-taskList tasks = segment def $ do
-  header (def & headerSize |?~ H2) $ text "Current tasks"
+  => [Task]
+  -> Workflow t m ()
+taskList tasks = withWorkflow $ segment def $ do
+  header (def & headerConfig_size |?~ H2) $ text "Current tasks"
   ctxQuery <- taskFilter $ allContexts tasks
   dyn_ $ ffor ctxQuery $ \q ->
-    segment (def & segmentRaised |~ True) $ do
+    segment (def & segmentConfig_raised |~ True) $ do
       forM_ tasks $ \t -> do
         if matchCtx q t
           then task t
           else blank
+  return never
 
 matchCtx :: TL.Text -> Task -> Bool
 matchCtx c t = case c of
@@ -127,8 +127,9 @@ taskFilter = toLazy . f . toStrict
 
 task :: UI t m => Task -> m ()
 task (Task s _done ctx desc) = do
-  label (def & labelLink .~ True & labelColor |?~ Teal
-             & labelRibbon |?~ LeftRibbon) $
+  label (def & labelConfig_link .~ True
+             & labelConfig_color |?~ Teal
+             & labelConfig_ribbon |?~ LeftRibbon) $
     text $ TL.toStrict $ TL.pack $ show ctx
 
   text $ TL.toStrict s
@@ -145,8 +146,8 @@ task (Task s _done ctx desc) = do
 toggleButton :: UI t m => T.Text -> m (Dynamic t Bool)
 toggleButton s = do
   rec let conf = def
-            & buttonFloated |?~ RightFloated
-            & buttonEmphasis .~ Dyn (bool Nothing (Just Primary) <$> viewNote)
+            & buttonConfig_floated |?~ RightFloated
+            & buttonConfig_emphasis .~ Dyn (bool Nothing (Just Primary) <$> viewNote)
       viewNote <- toggle False <=< button conf $ text s
   return viewNote
 
