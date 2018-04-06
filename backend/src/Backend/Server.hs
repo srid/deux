@@ -30,23 +30,23 @@ import Backend
 
 type AppM = ReaderT Env Handler
 
-server :: ServerT DemoAPI AppM
-server = getDemo
-  where getDemo :: AppM (Either Text Demo)
-        getDemo = do
+server :: ServerT DonneesAPI AppM
+server = getDonnees
+  where getDonnees :: AppM (Either Text Donnees)
+        getDonnees = do
           _e <- ask
-          Right <$> parseDemo -- TODO: wrap in Either, handle exception. how in readerT?
-          -- r :: Either SomeException Demo <- try parseDemo
+          Right <$> parseDonnees -- TODO: wrap in Either, handle exception. how in readerT?
+          -- r :: Either SomeException Donnees <- try parseDonnees
           -- return $ first (T.pack . show) r
 
 nt :: Env -> AppM a -> Handler a
 nt s x = runReaderT x s
 
 app :: Env -> Application
-app s = serve demoAPI $ hoistServer demoAPI (nt s) server
+app s = serve donnesAPI $ hoistServer donnesAPI (nt s) server
 
-demoAPI :: Proxy DemoAPI
-demoAPI = Proxy
+donnesAPI :: Proxy DonneesAPI
+donnesAPI = Proxy
 
 runServer
   :: (Functor m, MonadReader Env m, MonadIO m)
@@ -56,7 +56,7 @@ runServer = do
   liftIO $ putStrLn $ "Config: " <> show e
 
   -- Parse once and fail (for ghcid)
-  _ <- parseDemo
+  _ <- parseDonnees
 
   liftIO $ putStrLn "Running server at http://localhost:3001/"
   liftIO $ run 3001 $ simpleCors $ logStdoutDev $ app e

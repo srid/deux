@@ -49,7 +49,7 @@ main = do
 
 app :: MonadWidget t m => m ()
 app = container def $  do
-  result <- getPostBuild >>= demoClient . fmap (const ())
+  result <- getPostBuild >>= donnesClient . fmap (const ())
   let ys = fmapMaybe reqSuccess result
       errs = fmapMaybe reqFailure result
 
@@ -65,15 +65,15 @@ app = container def $  do
         [ (Tab_Tasks, text "Tasks")
         , (Tab_Pieces, text "Pieces")
         ] $ \case
-        Tab_Tasks -> workflowView $ taskList $ _demoTasks d
-        Tab_Pieces -> workflowView $ pieceList $ _demoPieces d
+        Tab_Tasks -> workflowView $ taskList $ _donnesTasks d
+        Tab_Pieces -> workflowView $ pieceList $ _donnesPieces d
 
-demoClient
+donnesClient
   :: forall t m. MonadWidget t m
   => Event t ()
-  -> m (Event t (ReqResult () (Either TL.Text Demo)))
-demoClient = client
-  (Proxy :: Proxy DemoAPI)
+  -> m (Event t (ReqResult () (Either TL.Text Donnees)))
+donnesClient = client
+  (Proxy :: Proxy DonneesAPI)
   (Proxy :: Proxy m)
   (Proxy :: Proxy ())
   (constDyn serverUrl)

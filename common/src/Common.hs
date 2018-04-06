@@ -9,8 +9,8 @@
 {-# LANGUAGE TypeOperators #-}
 module Common
   ( Env(..)
-  , Demo(..)
-  , DemoAPI
+  , Donnees(..)
+  , DonneesAPI
   , interpretOptions
   , module Common.Piece
   , module Common.Task
@@ -33,14 +33,14 @@ data Env = Env
   }
   deriving (Generic, Show, Eq)
 
--- TODO: Rename Demo to something meaningful
-data Demo = Demo
-  { _demoTasks :: [Task]
-  , _demoPieces :: [Piece]
+-- TODO: Rename Donnees to something meaningful
+data Donnees = Donnees
+  { _donnesTasks :: [Task]
+  , _donnesPieces :: [Piece]
   }
   deriving (Generic, Show, Interpret, Inject, ToJSON, FromJSON)
 
-type DemoAPI = "demo" :> Get '[JSON] (Either Text Demo)
+type DonneesAPI = "donnes" :> Get '[JSON] (Either Text Donnees)
 
 -- Follow record field naming conventions in this project when converting back
 -- and forth from Dhall fields.

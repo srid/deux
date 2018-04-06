@@ -28,11 +28,11 @@ readDhallFile path = do
 dumpDhall :: Inject a => a -> Text
 dumpDhall = pretty . embed (injectWith interpretOptions)
 
-parseDemo
+parseDonnees
   :: (Functor m, MonadReader Env m, MonadIO m)
-  => m Demo
-parseDemo = do
+  => m Donnees
+parseDonnees = do
   liftIO $ putStrLn "Reading dhall files..."
   tasks :: [Task] <- readDhallFile "Inbox.dhall"
   pieces :: [Piece] <- readDhallFile "Piece.dhall"
-  return $ Demo tasks pieces
+  return $ Donnees tasks pieces
