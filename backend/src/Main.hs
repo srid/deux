@@ -4,41 +4,42 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 module Main where
 
+import Control.Lens.Operators ((<&>))
 import Control.Monad.Reader
-import System.Console.CmdArgs
+import Data.Semigroup ((<>))
 import System.Directory (getHomeDirectory)
 import System.FilePath ((</>))
 
-import Control.Lens.Operators ((<&>))
+import Options.Applicative
 
 import Common (Env (Env))
 
 import qualified Backend.Finance as Finance
 import qualified Backend.Server as Server
 
-data BackendApp
-  = BackendApp_Server {}
-  | BackendApp_ImportCostcoCsv {}
-  deriving (Data,Typeable,Show,Eq)
+data Command
+  = Serve
+  | ImportCostcoCsv
+  deriving (Eq, Show)
 
 main :: IO ()
-main = do
-  cmd <- cmdArgs $ modes
-    [ BackendApp_Server
-      {} &= help "Run the backend API server" &= auto
-    , BackendApp_ImportCostcoCsv
-      {} &= help "Convert Costco bank statement to dhall file"
-    ]
-    &= help "Deux backend" &= program "backend" &= summary "Backend [dev]"
+main = run =<< execParser (p `withInfo` "Deux backend")
+  where
+    p = subparser
+      (  command "serve" (info (pure Serve) (progDesc "Start HTTP server"))
+      <> command "costco" (info (pure ImportCostcoCsv) (progDesc "Convert Costco bank statement CSV")))
+    withInfo opts desc = info (helper <*> opts) $ progDesc desc
 
-  case cmd of
-    BackendApp_Server -> do
-      dhallDir <- getHomeDirectory <&> (</> "Dropbox" </> "Documents")
-      runReaderT Server.runServer $ Env dhallDir
-    BackendApp_ImportCostcoCsv ->
-      runReaderT Finance.dumpTmp ()
+run :: Command -> IO ()
+run = \case
+  Serve -> do
+    dhallDir <- getHomeDirectory <&> (</> "Dropbox" </> "Documents")
+    runReaderT Server.runServer $ Env dhallDir
+  ImportCostcoCsv ->
+    runReaderT Finance.dumpTmp ()
