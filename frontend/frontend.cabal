@@ -22,10 +22,8 @@ executable frontend
                      , aeson
                      , bytestring
                      , common
-                     , algebraic-graphs
-                     , diagrams-lib
-                     , diagrams-reflex
                      , jsaddle-warp
+                     , pandoc
                      , reflex-dom
                      , semantic-reflex
                      , servant-reflex

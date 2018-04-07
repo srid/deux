@@ -58,8 +58,11 @@
     aeson = pkgs.fetchFromGitHub {
       owner = "bos";
       repo = "aeson";
-      rev = "8e58f82db806424ea3690ed1637375f2aadc7940";
-      sha256 = "0i62cx7i26zhr93cbajkv4qh3d7f00wxp06j6wy67xsmrf44m1dm";
+      # Pinning aeson<1.2 for pandoc.
+      rev = "3e5b02876c36d7471534c558b61ee5ff0e705a96";
+      sha256 = "1n29pd2is0w4d8g037r8hl2xpdi60d34i803xps1wvp0r8x90d0w";
+      # rev = "8e58f82db806424ea3690ed1637375f2aadc7940";
+      # sha256 = "0i62cx7i26zhr93cbajkv4qh3d7f00wxp06j6wy67xsmrf44m1dm";
     };
 
     attoparsec = pkgs.fetchFromGitHub {

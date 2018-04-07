@@ -35,6 +35,7 @@ executable backend
     , lifted-async
     , lifted-base
     , mtl
+    , pandoc
     , scientific
     , servant
     , servant-server
