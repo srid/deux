@@ -1,27 +1,23 @@
 {-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE GADTs #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE OverloadedStrings #-}
 module Frontend.Task where
 
 import Control.Monad (forM_, join)
-import qualified Data.Text.Lazy as TL
 import Data.Set (fromList, toList)
+import qualified Data.Text.Lazy as TL
 
 import GHCJS.DOM.Types (MonadJSM)
 import Reflex.Dom hiding (button, mainWidgetWithCss, _dropdown_value)
 import Reflex.Dom.SemanticUI
 
 import Common.Task
-import Frontend.Common (withWorkflow, note, toggleButton)
+import Frontend.Common (toggleButton, withWorkflow)
+import Frontend.Markdown (markdown)
 
-taskList
-  :: ( UI t m
-     , DomBuilderSpace m ~ GhcjsDomSpace
-     , MonadJSM (Performable m)
-     , MonadJSM m)
-  => [Task]
-  -> Workflow t m ()
+taskList :: MonadWidget t m  => [Task] -> Workflow t m ()
 taskList tasks = withWorkflow $ segment def $ do
   header (def & headerConfig_size |?~ H2) $ text "Current tasks"
   ctxQuery <- taskFilter $ allContexts tasks
@@ -53,7 +49,7 @@ taskFilter = toLazy . f . toStrict
     toStrict = fmap TL.toStrict
     toLazy = fmap . fmap $ TL.fromStrict
 
-task :: UI t m => Task -> m ()
+task :: MonadWidget t m => Task -> m ()
 task (Task s _done ctx desc) = do
   label (def & labelConfig_link .~ True
              & labelConfig_color |?~ Teal
@@ -67,7 +63,7 @@ task (Task s _done ctx desc) = do
     else return $ pure False
 
   dyn_ $ ffor viewNote $ \case
-    True -> note desc
+    True -> markdown $ constDyn $ TL.toStrict desc
     False -> blank
   divider def
 

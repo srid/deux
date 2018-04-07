@@ -1,14 +1,14 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TupleSections #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecursiveDo #-}
+{-# LANGUAGE TupleSections #-}
 module Frontend.Common where
 
+import Control.Monad (forM, (<=<))
 import Data.Bool (bool)
 import Data.Semigroup ((<>))
-import Control.Monad (forM, (<=<))
 import qualified Data.Text as T
-import qualified Data.Text.Lazy as TL
 
 import Reflex.Dom hiding (button, mainWidgetWithCss, _dropdown_value)
 import Reflex.Dom.SemanticUI
@@ -34,9 +34,6 @@ toggleButton s = do
             & buttonConfig_emphasis .~ Dyn (bool Nothing (Just Primary) <$> viewNote)
       viewNote <- toggle False <=< button conf $ text s
   return viewNote
-
-note :: UI t m => TL.Text -> m ()
-note = segment def . divClass "asis" . text . TL.toStrict
 
 tabs_
   :: (UI t m, Eq tab)
