@@ -1,7 +1,6 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
@@ -28,8 +27,8 @@ import Servant.API
 import Common.Piece
 import Common.Task
 
-data Env = Env
-  { _envDhallDataDir :: !FilePath
+newtype Env = Env
+  { _envDhallDataDir :: FilePath
   }
   deriving (Generic, Show, Eq)
 

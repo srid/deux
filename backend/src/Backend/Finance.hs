@@ -1,17 +1,14 @@
 {-# LANGUAGE DataKinds #-}
-{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 module Backend.Finance where
 
 import Control.Monad.Reader
 import Data.ByteString (ByteString)
-import qualified Data.Text.Lazy.IO as TLIO
 import qualified Data.ByteString as BS
+import qualified Data.Text.Lazy.IO as TLIO
 
 import Data.Sv
 import qualified Data.Sv.Decode as D
@@ -35,13 +32,9 @@ costcoTransactionDecoder =
 transactions
   :: (Functor m, MonadReader () m, MonadIO m)
   => m (DecodeValidation ByteString [CostcoTransaction])
-transactions = do
-  csvData <- liftIO $ BS.getContents
-  return $ parseDecode'
-    attoparsecByteString
-    costcoTransactionDecoder
-    defaultParseOptions
-    csvData
+transactions = liftIO $ parse <$> BS.getContents
+  where
+    parse = parseDecode' attoparsecByteString costcoTransactionDecoder defaultParseOptions
 
 -- XXX: Scratch
 dumpTmp :: (Functor m, MonadReader () m, MonadIO m) => m ()

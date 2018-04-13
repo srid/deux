@@ -1,7 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TupleSections #-}
 {-# LANGUAGE TypeFamilies #-}
 module Frontend.Piece where
 
@@ -10,7 +9,6 @@ import qualified Data.Text.Lazy as TL
 
 import Text.Pandoc
 
-import Reflex.Dom hiding (button, mainWidgetWithCss, _dropdown_value)
 import Reflex.Dom.SemanticUI
 
 import Common.Piece
@@ -23,7 +21,7 @@ pieceList
 pieceList pieces = withWorkflow $ segment def $ do
   header (def & headerConfig_size |?~ H2) $ text "Pieces"
   forM_ pieces $ \piece -> do
-    header (def & headerConfig_size |?~ H3) $ do
+    header (def & headerConfig_size |?~ H3) $ 
       text $ TL.toStrict $ _pieceTitle piece
     markdown $ constDyn $ TL.toStrict $ _pieceBody piece
   return never

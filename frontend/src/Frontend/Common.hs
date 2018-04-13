@@ -10,7 +10,6 @@ import Data.Bool (bool)
 import Data.Semigroup ((<>))
 import qualified Data.Text as T
 
-import Reflex.Dom hiding (button, mainWidgetWithCss, _dropdown_value)
 import Reflex.Dom.SemanticUI
 
 -- | Wrap a workflow creating a widget for use other workflows
@@ -45,7 +44,7 @@ tabs_ tab0 tabHeaders renderTab = do
       fmap leftmost $ forM tabHeaders $ \(tab, tabHeader) -> do
         let active = ffor currentTab (== tab)
         tab <<$ tabItem active tabHeader
-  segment (def & segmentConfig_attached |?~ BottomAttached) $ do
+  segment (def & segmentConfig_attached |?~ BottomAttached) $
     widgetHold_ (renderTab tab0) $ ffor openTab renderTab
   where
     tabItem active w

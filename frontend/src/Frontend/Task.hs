@@ -10,7 +10,6 @@ import Data.Set (fromList, toList)
 import qualified Data.Text.Lazy as TL
 
 import GHCJS.DOM.Types (MonadJSM)
-import Reflex.Dom hiding (button, mainWidgetWithCss, _dropdown_value)
 import Reflex.Dom.SemanticUI
 
 import Common.Task
@@ -22,8 +21,8 @@ taskList tasks = withWorkflow $ segment def $ do
   header (def & headerConfig_size |?~ H2) $ text "Current tasks"
   ctxQuery <- taskFilter $ allContexts tasks
   dyn_ $ ffor ctxQuery $ \q ->
-    segment (def & segmentConfig_raised |~ True) $ do
-      forM_ tasks $ \t -> do
+    segment (def & segmentConfig_raised |~ True) $
+      forM_ tasks $ \t ->
         if matchCtx q t
           then task t
           else blank
@@ -66,4 +65,3 @@ task (Task s _done ctx desc) = do
     True -> markdown $ constDyn $ TL.toStrict desc
     False -> blank
   divider def
-

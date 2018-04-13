@@ -6,11 +6,11 @@
 {-# LANGUAGE NoMonomorphismRestriction #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE RecursiveDo #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeFamilies #-}
 module Main where
 
+import Control.Monad (void)
 import Data.Monoid ((<>))
 import Data.Proxy (Proxy (..))
 import qualified Data.Text.Lazy as TL
@@ -18,7 +18,7 @@ import qualified Data.Text.Lazy as TL
 import Servant.Reflex
 
 import qualified Language.Javascript.JSaddle.Warp as JW
-import Reflex.Dom hiding (button, mainWidgetWithCss, _dropdown_value)
+import Reflex.Dom hiding (mainWidgetWithCss)
 import Reflex.Dom.SemanticUI
 
 import Common
@@ -35,9 +35,9 @@ data Tab
   | Tab_Pieces
   deriving (Eq, Show, Ord)
 
+-- TODO: Multiplex when doing ghcjs builds
 main :: IO ()
-main = do
-  -- TODO: Multiplex when doing ghcjs builds
+main =
   JW.run 3000 $ mainWidgetWithCss cssInline app
   where
     cssInline =
@@ -46,7 +46,7 @@ main = do
 
 app :: MonadWidget t m => m ()
 app = container def $  do
-  result <- getPostBuild >>= donnesClient . fmap (const ())
+  result <- getPostBuild >>= donnesClient . void
   let ys = fmapMaybe reqSuccess result
       errs = fmapMaybe reqFailure result
 
@@ -54,11 +54,10 @@ app = container def $  do
     dynText =<< holdDyn "" (leftmost [errs, const "" <$> ys])
 
   widgetHold_ (text "Loading...") $ ffor ys $ \case
-    Left e -> do
-      label def $ do
-      divClass "asis" $ text $ "oops:\n " <> TL.toStrict e
-    Right d -> do
-      tabs_ Tab_Tasks
+    Left e ->
+      label def $ divClass "asis" $ text $ "oops:\n " <> TL.toStrict e
+    Right d ->
+      tabs_ Tab_Pieces
         [ (Tab_Tasks, text "Tasks")
         , (Tab_Pieces, text "Pieces")
         ] $ \case
