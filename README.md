@@ -4,6 +4,8 @@ Are graphs and mind maps underrated?
 
 A playground to create the most awesome'est PIM ever.
 
+This started out by using Dhall as the underlying data format, but I've become somewhat dissatisfied with this approach. I am currently exploring the use of Postgres, and also limiting the scope to tree instead of graph. See [motif](https://github.com/srid/motif).
+
 ## Development
 
 See
