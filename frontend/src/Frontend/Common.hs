@@ -47,8 +47,8 @@ tabs_ tab0 tabHeaders renderTab = do
   segment (def & segmentConfig_attached |?~ BottomAttached) $
     widgetHold_ (renderTab tab0) $ ffor openTab renderTab
   where
-    tabItem active w
-      = (domEvent Click . fst) <<$>> elDynClass' "a" classes_ $ w
+    tabItem active w =
+      (domEvent Click . fst) <<$>> elDynClass' "a" classes_ $ w
       where
         classes_ = ("ui item" <>) <$> (bool "" " active" <$> active)
     tabbedMenu

@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeFamilies #-}
@@ -21,7 +22,7 @@ pieceList
 pieceList pieces = withWorkflow $ segment def $ do
   header (def & headerConfig_size |?~ H2) $ text "Pieces"
   forM_ pieces $ \piece -> do
-    header (def & headerConfig_size |?~ H3) $ 
+    header (def & headerConfig_size |?~ H3) $
       text $ TL.toStrict $ _pieceTitle piece
     markdown $ constDyn $ TL.toStrict $ _pieceBody piece
   return never

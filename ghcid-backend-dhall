@@ -3,4 +3,4 @@
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 DHALLFILES="${HOME}/Dropbox/Documents"
 
-nix-shell $DIR/default.nix -A shells.ghc --add-root $DIR/dist-newstyle/gc-roots/gc-root --indirect --run "ghcid --reload=${DHALLFILES} -c'ghci -O0 -DBACKEND -DUSE_TEMPLATE_HASKELL -Wall -icommon/src -ibackend/src -ifrontend/src Main' -W -T':main \"serve\"'"
+nix-shell $DIR/default.nix -A shells.ghc --add-root $DIR/dist-newstyle/gc-roots/gc-root --indirect --run "ghcid --reload=${DHALLFILES} -c'ghci -O0 -DBACKEND -DUSE_TEMPLATE_HASKELL -Wall -icommon/src -ibackend/src -ifrontend/src Main' -W -T':main \"serve\"' -o ghcid-backend.txt"

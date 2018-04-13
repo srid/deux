@@ -10,7 +10,6 @@
 {-# LANGUAGE TypeFamilies #-}
 module Main where
 
-import Control.Monad (void)
 import Data.Monoid ((<>))
 import Data.Proxy (Proxy (..))
 import qualified Data.Text.Lazy as TL
@@ -46,7 +45,7 @@ main =
 
 app :: MonadWidget t m => m ()
 app = container def $  do
-  result <- getPostBuild >>= donnesClient . void
+  result <- getPostBuild >>= donnesClient
   let ys = fmapMaybe reqSuccess result
       errs = fmapMaybe reqFailure result
 
